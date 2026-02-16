@@ -26,7 +26,6 @@ export function ClientForm({
 }: ClientFormProps) {
   const [name, setName] = useState(initialName)
   const [whatsapp, setWhatsapp] = useState(initialWhatsapp)
-  const [notes, setNotes] = useState(initialNotes)
   const [errors, setErrors] = useState<{ name?: string; whatsapp?: string }>({})
 
   const formatWhatsapp = (value: string) => {
@@ -60,7 +59,7 @@ export function ClientForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
-      onSubmit(name, whatsapp, notes)
+      onSubmit(name, whatsapp, initialNotes)
     }
   }
 
