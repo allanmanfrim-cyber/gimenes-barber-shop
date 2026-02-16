@@ -46,7 +46,7 @@ export default function AdminAppointments() {
     }
   }
 
-  const handleStatusChange = async (id: number, status: string) => {
+  const handleStatusChange = async (id: number, status: Appointment['status']) => {
     try {
       await api.appointments.update(id, { status })
       loadAppointments()

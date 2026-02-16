@@ -10,6 +10,7 @@ export interface Barber {
   id: number
   name: string
   phone?: string
+  photo_url?: string
   active: boolean
 }
 

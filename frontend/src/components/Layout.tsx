@@ -10,7 +10,7 @@ interface LayoutProps {
   onBack?: () => void
 }
 
-export function Layout({ children, showHeader = true, title, showBackButton = false, onBack }: LayoutProps) {
+export function Layout({ children, showHeader = true, showBackButton = false, onBack }: LayoutProps) {
   const navigate = useNavigate()
 
   const handleBack = () => {

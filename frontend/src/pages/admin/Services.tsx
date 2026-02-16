@@ -77,7 +77,7 @@ export default function AdminServices() {
 
   const handleToggleActive = async (service: Service) => {
     try {
-      await api.services.update(service.id, { active: service.active ? 0 : 1 })
+      await api.services.update(service.id, { active: !service.active })
       loadServices()
     } catch (error) {
       console.error('Error toggling service:', error)

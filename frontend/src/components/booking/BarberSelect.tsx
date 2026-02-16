@@ -14,11 +14,6 @@ const barberImages: Record<string, string> = {
   'Abner William': '/images/abner.jpg',
 }
 
-const barberInfo: Record<string, { specialty: string; isOwner?: boolean }> = {
-  'Junior Gimenes': { specialty: '', isOwner: false },
-  'Abner William': { specialty: '' },
-}
-
 export function BarberSelect({ barbers, selectedBarber, loading, onSelect }: BarberSelectProps) {
   if (loading) {
     return (
@@ -35,7 +30,6 @@ export function BarberSelect({ barbers, selectedBarber, loading, onSelect }: Bar
   })
 
   const getBarberImage = (name: string) => barberImages[name] || null
-  const getBarberInfo = (name: string) => barberInfo[name] || { specialty: 'Barbeiro profissional' }
 
   return (
     <div className="px-4 py-6">
@@ -44,7 +38,6 @@ export function BarberSelect({ barbers, selectedBarber, loading, onSelect }: Bar
 
       <div className="space-y-4">
         {sortedBarbers.map((barber) => {
-          const info = getBarberInfo(barber.name)
           const image = getBarberImage(barber.name)
           const isSelected = selectedBarber?.id === barber.id
 
