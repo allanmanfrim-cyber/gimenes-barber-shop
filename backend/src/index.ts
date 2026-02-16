@@ -23,7 +23,7 @@ if (!fs.existsSync(dataDir)) {
 initDatabase()
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = Number(process.env.PORT) || 3001
 
 // Forçar HTTPS em produção
 if (process.env.NODE_ENV === 'production') {
