@@ -63,11 +63,6 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// Rota raiz para Healthcheck do Railway passar rápido
-app.get('/', (_req, res) => {
-  res.send('Gimenes Barber Shop API is running')
-})
-
 // Servir arquivos do frontend
 const frontendDist = path.join(process.cwd(), '../frontend/dist')
 const alternativeFrontendDist = path.join(process.cwd(), 'frontend/dist')
