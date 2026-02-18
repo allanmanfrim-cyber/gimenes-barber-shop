@@ -286,4 +286,14 @@ router.post('/clients/:id/no-show', (req, res) => {
   }
 })
 
+router.post('/clients/:id/clear-penalty', (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+    ClientModel.clearPenalty(id)
+    res.json({ message: 'Multa limpa com sucesso' })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao limpar multa' })
+  }
+})
+
 export default router

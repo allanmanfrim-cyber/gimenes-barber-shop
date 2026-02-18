@@ -37,6 +37,7 @@ export default function Booking() {
     setReferenceImages,
     setPaymentMethod,
     submitBooking,
+    goToPayment,
     goToConfirmation,
     goBack,
     reset
@@ -162,7 +163,7 @@ export default function Booking() {
       {step === 4.5 && (
         <ReferenceImageUpload
           onImagesSelected={setReferenceImages}
-          onNext={() => setPaymentMethod('pix', 'online')} // Default para proxima tela
+          onNext={goToPayment}
           onBack={handleBack}
         />
       )}

@@ -54,6 +54,12 @@ router.post('/', async (req, res) => {
 
     const client = ClientModel.findOrCreate(clientName, clientWhatsapp, clientEmail, clientBirthDate)
 
+    if (client.status_multa === 'ativa') {
+      return res.status(403).json({ 
+        message: 'Você possui uma multa pendente por falta anterior. Entre em contato com a barbearia para regularizar seu cadastro.' 
+      })
+    }
+
     const appointment = AppointmentModel.create({
       clientId: client.id,
       barberId: finalBarberId,

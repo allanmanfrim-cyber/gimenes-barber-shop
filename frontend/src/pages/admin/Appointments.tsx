@@ -78,6 +78,17 @@ export default function AdminAppointments() {
     }
   }
 
+  const handleClearPenalty = async (clientId: number) => {
+    if (!confirm('Deseja realmente limpar a multa deste cliente?')) return
+    try {
+      await api.admin.clearPenalty(clientId)
+      loadAppointments()
+      alert('Multa limpa com sucesso.')
+    } catch (error) {
+      console.error('Error clearing penalty:', error)
+    }
+  }
+
   return (
     <AdminLayout title="Agendamentos">
       <div className="space-y-6">
@@ -212,6 +223,20 @@ export default function AdminAppointments() {
                 <div className="flex justify-between">
                   <span className="text-dark-400">Observacoes</span>
                   <span className="text-white">{selectedAppointment.notes}</span>
+                </div>
+              )}
+              {selectedAppointment.client?.status_multa === 'ativa' && (
+                <div className="mt-4 p-3 bg-red-900/20 border border-red-500 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="text-red-400 text-xs font-bold uppercase">Multa Ativa</p>
+                    <p className="text-white text-xs">Agendamentos bloqueados.</p>
+                  </div>
+                  <button
+                    onClick={() => handleClearPenalty(selectedAppointment.client_id)}
+                    className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded hover:bg-red-600 transition-colors"
+                  >
+                    LIMPAR
+                  </button>
                 </div>
               )}
             </div>

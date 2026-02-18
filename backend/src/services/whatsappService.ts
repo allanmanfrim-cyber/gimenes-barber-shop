@@ -172,7 +172,14 @@ export const WhatsAppService = {
       const date = new Date(apt.date_time).toLocaleDateString('pt-BR')
       const time = new Date(apt.date_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       
-      const paymentStatus = apt.payment_status === 'paid' || apt.payment_status === 'completed' ? 'PAGO' : 'PENDENTE'
+      let paymentStatus = 'PENDENTE'
+      if (apt.payment_status === 'paid_pix' || apt.payment_status === 'paid_card' || apt.payment_status === 'paid_nubank') {
+        paymentStatus = 'PAGO ✅'
+      } else if (apt.payment_status === 'pay_on_site') {
+        paymentStatus = 'PAGAR NO LOCAL 💈'
+      } else if (apt.payment_status === 'cancelled') {
+        paymentStatus = 'CANCELADO ❌'
+      }
 
       // Message for Client
       const clientMsg = MessageTemplates.appointmentConfirmedClient({

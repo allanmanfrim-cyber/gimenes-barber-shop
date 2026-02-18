@@ -127,6 +127,8 @@ export const api = {
       return fetchApi<{ clients: any[] }>(`/admin/birthday-clients?${params}`)
     },
     registerNoShow: (clientId: number) =>
-      fetchApi(`/admin/clients/${clientId}/no-show`, { method: 'POST' })
+      fetchApi(`/admin/clients/${clientId}/no-show`, { method: 'POST' }),
+    clearPenalty: (clientId: number) =>
+      fetchApi(`/admin/clients/${clientId}/clear-penalty`, { method: 'POST' })
   }
 }

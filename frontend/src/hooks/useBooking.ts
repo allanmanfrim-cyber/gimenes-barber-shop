@@ -104,14 +104,20 @@ export function useBooking() {
 
   const confirmClientInfo = () => {
     // Verificar se o serviço selecionado requer fotos de referência
-    const requiresPhotos = bookingData.service?.name.includes('Corte de Cabelo') || 
-                           bookingData.service?.name.includes('Corte + Barba')
+    const serviceName = bookingData.service?.name.toLowerCase() || ''
+    const requiresPhotos = serviceName.includes('corte') || 
+                           serviceName.includes('combo') ||
+                           serviceName.includes('hidratação')
     
     if (requiresPhotos) {
       setStep(4.5)
     } else {
       setStep(5)
     }
+  }
+
+  const goToPayment = () => {
+    setStep(5)
   }
 
   const setPaymentMethod = (method: PaymentMethod, type?: PaymentType) => {
@@ -223,6 +229,7 @@ export function useBooking() {
     setReferenceImages,
     setPaymentMethod,
     submitBooking,
+    goToPayment,
     goToConfirmation,
     goBack,
     reset
