@@ -28,7 +28,7 @@ export default function AdminBarbers() {
 
   const handleToggleActive = async (barber: Barber) => {
     try {
-      await api.barbers.update(barber.id, { active: barber.active ? 0 : 1 } as any)
+      await api.barbers.update(barber.id, { active: barber.active ? false : true })
       loadBarbers()
     } catch (error) {
       console.error('Error toggling barber:', error)
