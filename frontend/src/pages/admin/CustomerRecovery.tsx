@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
-import { RefreshCcw, MessageCircle, Calendar } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { Loading } from '../../components/ui/Loading'
 
 export default function AdminCustomerRecovery() {

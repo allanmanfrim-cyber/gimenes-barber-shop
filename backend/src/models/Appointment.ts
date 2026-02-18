@@ -27,8 +27,8 @@ export const AppointmentModel = {
         a.*,
         c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email,
         c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
-        b.name as barber_name, b.whatsapp as barber_whatsapp,
-        s.name as service_name, s.duration_minutes, s.price,
+        b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active,
+        s.name as service_name, s.duration_minutes, s.price, s.active as service_active,
         p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
       LEFT JOIN clients c ON a.client_id = c.id
@@ -64,8 +64,8 @@ export const AppointmentModel = {
         a.*,
         c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email,
         c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
-        b.name as barber_name, b.whatsapp as barber_whatsapp,
-        s.name as service_name, s.duration_minutes, s.price,
+        b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active,
+        s.name as service_name, s.duration_minutes, s.price, s.active as service_active,
         p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
       LEFT JOIN clients c ON a.client_id = c.id
@@ -167,7 +167,7 @@ function formatAppointmentRow(row: any): Appointment {
       id: row.client_id,
       name: row.client_name,
       whatsapp: row.client_whatsapp,
-      email: row.client_email,
+      email: row.client_email || '',
       data_nascimento: row.data_nascimento,
       faltas_sem_aviso: row.faltas_sem_aviso,
       status_multa: row.status_multa,
@@ -176,9 +176,9 @@ function formatAppointmentRow(row: any): Appointment {
     barber: row.barber_name ? {
       id: row.barber_id,
       name: row.barber_name,
-      whatsapp: row.barber_whatsapp,
-      email: null,
-      active: 1,
+      whatsapp: row.barber_whatsapp || '',
+      email: row.barber_email || '',
+      active: row.barber_active ?? 1,
       created_at: ''
     } : undefined,
     service: row.service_name ? {
@@ -186,7 +186,7 @@ function formatAppointmentRow(row: any): Appointment {
       name: row.service_name,
       duration_minutes: row.duration_minutes,
       price: row.price,
-      active: 1,
+      active: row.service_active ?? 1,
       created_at: ''
     } : undefined,
     payment: row.payment_id ? {

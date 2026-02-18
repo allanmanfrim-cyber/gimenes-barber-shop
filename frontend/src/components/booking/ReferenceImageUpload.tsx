@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Camera, X, Image as ImageIcon, Upload } from 'lucide-react'
+import { X, Upload } from 'lucide-react'
 
 interface ReferenceImageUploadProps {
   onImagesSelected: (images: string[]) => void
@@ -9,7 +9,6 @@ interface ReferenceImageUploadProps {
 
 export function ReferenceImageUpload({ onImagesSelected, onNext, onBack }: ReferenceImageUploadProps) {
   const [images, setImages] = useState<string[]>([])
-  const [loading, setLoading] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -20,7 +19,6 @@ export function ReferenceImageUpload({ onImagesSelected, onNext, onBack }: Refer
       return
     }
 
-    setLoading(true)
     const newImages = [...images]
     const readers = Array.from(files).map(file => {
       return new Promise<string>((resolve) => {
@@ -36,7 +34,6 @@ export function ReferenceImageUpload({ onImagesSelected, onNext, onBack }: Refer
       const updatedImages = [...newImages, ...results]
       setImages(updatedImages)
       onImagesSelected(updatedImages)
-      setLoading(false)
     })
   }
 
