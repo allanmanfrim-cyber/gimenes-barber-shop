@@ -70,21 +70,27 @@ export function DateTimeSelect({
           {days.map((date) => {
             const selected = isDateSelected(date)
             const today = isToday(date)
+            const isSunday = date.getDay() === 0
             
             return (
               <button
                 key={date.toISOString()}
-                onClick={() => handleDateSelect(date)}
+                onClick={() => !isSunday && handleDateSelect(date)}
+                disabled={isSunday}
                 className={`p-3 rounded-xl border-2 transition-all text-center ${
                   selected
                     ? 'border-primary-500 bg-primary-50'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                    : isSunday
+                      ? 'bg-gray-50 border-gray-100 opacity-50 cursor-not-allowed'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
                 }`}
               >
                 <div className="text-xs text-dark-400 mb-1">
                   {format(date, 'EEEE', { locale: ptBR })}
                 </div>
-                <div className={`text-2xl font-bold ${selected ? 'text-primary-600' : 'text-dark-900'}`}>
+                <div className={`text-2xl font-bold ${
+                  selected ? 'text-primary-600' : isSunday ? 'text-gray-300' : 'text-dark-900'
+                }`}>
                   {format(date, 'd')}
                 </div>
                 <div className="text-xs text-dark-400">
@@ -92,6 +98,9 @@ export function DateTimeSelect({
                 </div>
                 {today && (
                   <div className="text-xs text-primary-600 font-medium">Hoje</div>
+                )}
+                {isSunday && (
+                  <div className="text-[10px] text-gray-400 font-medium uppercase mt-1">Fechado</div>
                 )}
               </button>
             )
@@ -115,7 +124,8 @@ export function DateTimeSelect({
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {timeSlots.map((slot) => {
                   const selected = selectedTime === slot.time
-                  const available = slot.available
+                  const isLunch = slot.time === '14:30'
+                  const available = slot.available && !isLunch
                   
                   return (
                     <button
