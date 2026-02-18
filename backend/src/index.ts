@@ -26,12 +26,22 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
 }
 
-// Inicializa o banco (que já chama as migrações internamente)
-initDatabase()
+// Inicializa o banco com tratamento de erro para nao travar o startup
+try {
+  initDatabase()
+  console.log('Database initialized successfully')
+} catch (error) {
+  console.error('Failed to initialize database:', error)
+}
 
 // Configura automações
-setupBirthdayAutomation()
-setupDailyReportAutomation()
+try {
+  setupBirthdayAutomation()
+  setupDailyReportAutomation()
+  console.log('Automations configured successfully')
+} catch (error) {
+  console.error('Failed to configure automations:', error)
+}
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -51,6 +61,11 @@ app.use('/api/payments', paymentsRoutes)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// Rota raiz para Healthcheck do Railway passar rápido
+app.get('/', (_req, res) => {
+  res.send('Gimenes Barber Shop API is running')
 })
 
 // Servir arquivos do frontend
