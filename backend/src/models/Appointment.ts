@@ -155,12 +155,15 @@ function formatAppointmentRow(row: any): Appointment {
       id: row.client_id,
       name: row.client_name,
       whatsapp: row.client_whatsapp,
+      email: '',
       created_at: ''
     } : undefined,
     barber: row.barber_name ? {
       id: row.barber_id,
       name: row.barber_name,
-      active: 1,
+      whatsapp: '',
+      email: '',
+      active: true,
       created_at: ''
     } : undefined,
     service: row.service_name ? {

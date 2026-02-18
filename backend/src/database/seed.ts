@@ -1,11 +1,9 @@
 import { db, initDatabase } from './init.js'
 import bcrypt from 'bcryptjs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import fs from 'fs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const dataDir = path.join(__dirname, '../../data')
+const dataDir = path.join(process.cwd(), 'data')
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true })

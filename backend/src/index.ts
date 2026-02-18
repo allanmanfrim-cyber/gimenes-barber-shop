@@ -2,7 +2,6 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import fs from 'fs'
 
 import { initDatabase } from './database/init.js'
@@ -15,8 +14,7 @@ import adminRoutes from './routes/admin.js'
 import businessHoursRoutes from './routes/businessHours.js'
 import paymentsRoutes from './routes/payments.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const dataDir = path.join(__dirname, '../data')
+const dataDir = path.join(process.cwd(), 'data')
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true })
