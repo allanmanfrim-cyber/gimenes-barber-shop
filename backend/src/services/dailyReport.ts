@@ -1,5 +1,6 @@
 import { db } from '../database/init.js'
 import nodemailer from 'nodemailer'
+import cron from 'node-cron'
 
 interface DailyAppointment {
   barber_name: string
@@ -235,4 +236,14 @@ export async function sendDailyReport(): Promise<void> {
   })
 
   console.log(`Daily report sent to ${recipientEmail}`)
+}
+
+export function setupDailyReportAutomation() {
+  // Schedule at 23:55 every day
+  cron.schedule('55 23 * * *', async () => {
+    await sendDailyReport()
+  }, {
+    timezone: 'America/Sao_Paulo'
+  })
+  console.log('Daily report automation scheduled for 23:55 (Sao Paulo time)')
 }

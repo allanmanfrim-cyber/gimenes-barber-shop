@@ -14,11 +14,16 @@ import adminRoutes from './routes/admin.js'
 import businessHoursRoutes from './routes/businessHours.js'
 import paymentsRoutes from './routes/payments.js'
 import { setupBirthdayAutomation } from './services/birthdayService.js'
+import { setupDailyReportAutomation } from './services/dailyReport.js'
 
 const dataDir = path.join(process.cwd(), 'data')
+const uploadsDir = path.join(process.cwd(), 'uploads')
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true })
+}
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true })
 }
 
 // Inicializa o banco (que já chama as migrações internamente)
@@ -26,13 +31,15 @@ initDatabase()
 
 // Configura automações
 setupBirthdayAutomation()
+setupDailyReportAutomation()
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
 app.use(cors())
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
 
+app.use('/uploads', express.static(uploadsDir))
 app.use('/api/services', servicesRoutes)
 app.use('/api/barbers', barbersRoutes)
 app.use('/api/availability', availabilityRoutes)

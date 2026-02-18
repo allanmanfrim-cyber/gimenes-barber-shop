@@ -15,7 +15,7 @@ const services = [
   { name: 'Corte de Cabelo', duration_minutes: 30, price: 45.00 },
   { name: 'Barba', duration_minutes: 20, price: 30.00 },
   { name: 'Corte de Cabelo + Barba', duration_minutes: 60, price: 60.00 },
-  { name: 'Corte cabelo + hidratação', duration_minutes: 50, price: 60.00 },
+  { name: 'Corte cabelo + hidratação', duration_minutes: 60, price: 60.00 },
   { name: 'Corte de Cabelo + Barba + Hidratação', duration_minutes: 60, price: 75.00 },
   { name: 'Pézinho', duration_minutes: 15, price: 15.00 },
   { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },

@@ -111,10 +111,17 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_appointments_barber ON appointments(barber_id);
     CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
     CREATE INDEX IF NOT EXISTS idx_notifications_appointment ON notifications(appointment_id);
-    CREATE INDEX IF NOT EXISTS idx_payments_external ON payments(external_reference);
   `)
 
   runMigrations()
+  
+  // Criar indices que dependem de colunas migradas
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_payments_external ON payments(external_reference);`)
+  } catch (e) {
+    console.error('Nao foi possivel criar indice idx_payments_external:', (e as any).message)
+  }
+
   applyMigrations()
   seedTestUsers()
 

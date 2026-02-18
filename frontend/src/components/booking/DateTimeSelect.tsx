@@ -76,9 +76,9 @@ export function DateTimeSelect({
             <div className="flex justify-center py-8">
               <Loading text="Carregando horarios..." />
             </div>
-          ) : availableSlots.length > 0 ? (
+          ) : timeSlots.length > 0 ? (
             <div className="grid grid-cols-4 gap-2">
-              {availableSlots.map((slot) => (
+              {timeSlots.map((slot) => (
                 <TimeSlot
                   key={slot.time}
                   time={slot.time}

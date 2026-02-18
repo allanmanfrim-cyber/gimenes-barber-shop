@@ -109,6 +109,45 @@ export const WhatsAppService = {
     }
   },
 
+  sendMedia: async (to: string, mediaUrl: string, caption?: string): Promise<{ success: boolean; error?: string }> => {
+    const formattedPhone = WhatsAppService.formatPhoneNumber(to)
+
+    if (!WhatsAppService.isConfigured()) {
+      console.log(`[SIMULACAO WhatsApp Media] Para: ${formattedPhone}`)
+      console.log(`[SIMULACAO WhatsApp Media] URL: ${mediaUrl}`)
+      return { success: true }
+    }
+
+    try {
+      await axios.post(
+        `https://graph.facebook.com/v18.0/${phoneId}/messages`,
+        {
+          messaging_product: 'whatsapp',
+          to: formattedPhone,
+          type: 'image',
+          image: { 
+            link: mediaUrl,
+            ...(caption && { caption })
+          }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      return { success: true }
+    } catch (error: any) {
+      console.error('Erro ao enviar WhatsApp Media:', error.response?.data || error.message)
+      return { 
+        success: false, 
+        error: error.response?.data?.error?.message || error.message 
+      }
+    }
+  },
+
   sendConfirmation: async (appointmentId: number) => {
     try {
       const apt = db.prepare(`
@@ -165,8 +204,18 @@ export const WhatsAppService = {
       
       // Try real sending
       await WhatsAppService.sendMessage(apt.client_whatsapp, clientMsg)
+      
       if (apt.barber_whatsapp) {
         await WhatsAppService.sendMessage(apt.barber_whatsapp, barberMsg)
+        
+        // Enviar imagens de referencia para o barbeiro como midia
+        for (let i = 0; i < referenceImages.length; i++) {
+          await WhatsAppService.sendMedia(
+            apt.barber_whatsapp, 
+            referenceImages[i], 
+            `Foto de referência ${i + 1} - Cliente ${apt.client_name}`
+          )
+        }
       }
       
     } catch (error) {

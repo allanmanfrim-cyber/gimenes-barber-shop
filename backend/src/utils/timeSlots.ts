@@ -16,13 +16,15 @@ export function generateTimeSlots(
   const dayOfWeek = targetDate.getDay()
   
   const businessHours = BusinessHoursModel.findByDay(dayOfWeek)
-  if (!businessHours || !businessHours.is_open) {
-    return []
-  }
+  const isOpen = businessHours && businessHours.is_open
+  
+  // Se for domingo (ou fechado), usamos um horario padrao so para mostrar os slots desabilitados
+  const openTime = isOpen ? businessHours.open_time : '09:00'
+  const closeTime = isOpen ? businessHours.close_time : '19:00'
 
   const slots: TimeSlot[] = []
-  const [openHour, openMin] = businessHours.open_time.split(':').map(Number)
-  const [closeHour, closeMin] = businessHours.close_time.split(':').map(Number)
+  const [openHour, openMin] = openTime.split(':').map(Number)
+  const [closeHour, closeMin] = closeTime.split(':').map(Number)
 
   const now = new Date()
   const isToday = targetDate.toDateString() === now.toDateString()
@@ -56,12 +58,19 @@ export function generateTimeSlots(
       }
 
       let available = false
-      for (const bid of barberIds) {
-        const dateTime = `${date}T${timeStr}:00`
-        const conflicts = AppointmentModel.findConflicts(bid, dateTime, serviceDuration)
-        if (conflicts.length === 0) {
-          available = true
-          break
+      if (isOpen) {
+        // Almoço das 14:30 às 15:00 (regra global da barbearia)
+        if (timeStr === '14:30') {
+          available = false
+        } else {
+          for (const bid of barberIds) {
+            const dateTime = `${date}T${timeStr}:00`
+            const conflicts = AppointmentModel.findConflicts(bid, dateTime, serviceDuration)
+            if (conflicts.length === 0) {
+              available = true
+              break
+            }
+          }
         }
       }
 

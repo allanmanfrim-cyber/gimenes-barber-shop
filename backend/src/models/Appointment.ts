@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import { db } from '../database/init.js'
 import { Service } from './Service.js'
 import { Barber } from './Barber.js'
@@ -18,6 +20,34 @@ export interface Appointment {
   barber?: Barber
   service?: Service
   payment?: Payment
+}
+
+const saveBase64Image = (base64String: string, id: number, index: number): string | null => {
+  try {
+    if (!base64String.startsWith('data:image')) return null
+
+    const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+    if (!matches || matches.length !== 3) return null
+
+    const type = matches[1]
+    const extension = type.split('/')[1] || 'jpg'
+    const data = Buffer.from(matches[2], 'base64')
+    
+    const fileName = `ref_${id}_${index}_${Date.now()}.${extension}`
+    const uploadsDir = path.join(process.cwd(), 'uploads')
+    
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true })
+    }
+
+    fs.writeFileSync(path.join(uploadsDir, fileName), data)
+    
+    const appUrl = process.env.APP_URL || 'https://www.gimenesbarber.com.br'
+    return `${appUrl}/uploads/${fileName}`
+  } catch (error) {
+    console.error('Error saving base64 image:', error)
+    return null
+  }
 }
 
 export const AppointmentModel = {
@@ -111,19 +141,34 @@ export const AppointmentModel = {
     notes?: string
     referenceImages?: string[]
   }): Appointment => {
+    // 1. Inserir primeiro para obter o ID
     const result = db.prepare(`
-      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, reference_images, status)
-      VALUES (?, ?, ?, ?, ?, ?, 'confirmed')
+      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, status)
+      VALUES (?, ?, ?, ?, ?, 'confirmed')
     `).run(
       data.clientId, 
       data.barberId, 
       data.serviceId, 
       data.dateTime, 
-      data.notes || null,
-      data.referenceImages ? JSON.stringify(data.referenceImages) : null
+      data.notes || null
     )
     
-    return AppointmentModel.findById(result.lastInsertRowid as number)!
+    const id = result.lastInsertRowid as number
+    
+    // 2. Processar imagens se houver
+    let savedUrls: string[] = []
+    if (data.referenceImages && data.referenceImages.length > 0) {
+      savedUrls = data.referenceImages
+        .map((img, idx) => saveBase64Image(img, id, idx))
+        .filter((url): url is string => url !== null)
+      
+      if (savedUrls.length > 0) {
+        db.prepare('UPDATE appointments SET reference_images = ? WHERE id = ?')
+          .run(JSON.stringify(savedUrls), id)
+      }
+    }
+    
+    return AppointmentModel.findById(id)!
   },
 
   update: (id: number, data: Partial<Appointment>): Appointment | undefined => {
