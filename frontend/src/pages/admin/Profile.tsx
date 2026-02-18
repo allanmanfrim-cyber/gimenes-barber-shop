@@ -3,7 +3,7 @@ import { AdminLayout } from '../../components/admin/AdminLayout'
 import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { User, Camera, Phone } from 'lucide-react'
+import { User as UserIcon, Camera, Phone } from 'lucide-react'
 import { api } from '../../services/api'
 
 export default function AdminProfile() {
@@ -17,9 +17,8 @@ export default function AdminProfile() {
   })
 
   useEffect(() => {
-    const u = user as any
-    if (u && u.barberId) {
-      loadProfile(u.barberId)
+    if (user && user.barberId) {
+      loadProfile(user.barberId)
     } else {
       setLoading(false)
     }
@@ -45,15 +44,14 @@ export default function AdminProfile() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    const u = user as any
-    if (!u || !u.barberId) {
+    if (!user || !user.barberId) {
       alert('Erro: ID do barbeiro não encontrado')
       return
     }
     
     setSaving(true)
     try {
-      await api.barbers.update(u.barberId, {
+      await api.barbers.update(user.barberId, {
         name: profile.name,
         whatsapp: profile.phone
       })
@@ -76,7 +74,7 @@ export default function AdminProfile() {
                 {profile.photo_url ? (
                   <img src={profile.photo_url} alt={profile.name} className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-16 h-16 text-dark-500" />
+                  <UserIcon className="w-16 h-16 text-dark-500" />
                 )}
               </div>
               <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">

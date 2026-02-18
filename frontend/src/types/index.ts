@@ -11,6 +11,7 @@ export interface Barber {
   name: string
   whatsapp?: string
   email?: string
+  photo_url?: string
   active: boolean
 }
 

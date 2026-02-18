@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { Barber } from '../../types'
 import { api } from '../../services/api'
-import { User, Plus, Edit2, Phone, Mail, X, Check } from 'lucide-react'
+import { User as UserIcon, Plus, Edit2, Phone, Mail, X, Check } from 'lucide-react'
 
 export default function AdminBarbers() {
   const [barbers, setBarbers] = useState<Barber[]>([])
@@ -95,8 +95,12 @@ export default function AdminBarbers() {
                 className="bg-dark-800 border border-dark-700 rounded-xl p-6"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-dark-700 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-8 h-8 text-primary-500" />
+                  <div className="w-16 h-16 bg-dark-700 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {barber.photo_url ? (
+                      <img src={barber.photo_url} alt={barber.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-8 h-8 text-primary-500" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
