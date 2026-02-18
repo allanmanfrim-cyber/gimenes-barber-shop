@@ -52,8 +52,6 @@ export function DateTimeSelect({
     }
   }
 
-  const availableSlots = timeSlots.filter(slot => slot.available)
-
   return (
     <div className="space-y-6">
       <div>

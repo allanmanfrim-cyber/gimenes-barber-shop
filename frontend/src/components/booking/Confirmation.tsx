@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Appointment, PaymentStatus } from '../../types'
+import { Appointment } from '../../types'
 import { Button } from '../ui/Button'
 import { CheckCircle, Copy, Check, Bell, Mail, MessageSquare, Instagram, MapPin, Star } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
@@ -51,9 +51,6 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
   const formattedDateTime = appointment.date_time
     ? format(parseISO(appointment.date_time), "dd 'de' MMMM 'as' HH:mm", { locale: ptBR })
     : ''
-
-  const paymentStatus = appointment.payment?.status || 'pending'
-  const isPayOnSite = paymentStatus === 'pay_on_site'
 
   return (
     <div className="text-center space-y-6 max-w-md mx-auto">
