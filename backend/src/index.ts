@@ -41,7 +41,16 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
-  console.log(`API available at http://localhost:${PORT}/api`)
+const frontendDist = path.join(process.cwd(), 'frontend/dist')
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist))
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'))
+  })
+}
+
+const portNumber = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT
+app.listen(portNumber, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${portNumber}`)
+  console.log(`API available at http://0.0.0.0:${portNumber}/api`)
 })
