@@ -3,10 +3,13 @@ import { Calendar, Star, Clock, MapPin, Phone } from 'lucide-react'
 
 export default function Home() {
   const services = [
-    { name: 'Cabelo Masculino', description: 'Corte tradicional com máquina e tesoura', price: 'R$ 50,00' },
-    { name: 'Barba', description: 'Aparo e modelagem completa', price: 'R$ 40,00' },
-    { name: 'Corte + Barba', description: 'Combo completo', price: 'R$ 80,00' },
-    { name: 'Pigmentação', description: 'Tingimento capilar', price: 'R$ 60,00' },
+    { name: 'Corte de Cabelo', description: 'Corte tradicional com máquina e tesoura', price: 'R$ 40,00' },
+    { name: 'Barba', description: 'Aparo e modelagem completa', price: 'R$ 30,00' },
+    { name: 'Corte de Cabelo + Barba', description: 'Combo completo', price: 'R$ 60,00' },
+    { name: 'Corte + Hidratação', description: 'Corte e tratamento capilar', price: 'R$ 60,00' },
+    { name: 'Corte + Barba + Hidratação', description: 'Pacote completo de cuidados', price: 'R$ 75,00' },
+    { name: 'Pézinho', description: 'Acabamento e contorno', price: 'R$ 15,00' },
+    { name: 'Sobrancelha', description: 'Design e limpeza', price: 'R$ 10,00' },
   ]
 
   const features = [
@@ -23,7 +26,7 @@ export default function Home() {
           <img 
             src="/images/logo.png" 
             alt="Gimenes Barber Shop" 
-            className="w-56 mx-auto mb-12"
+            className="w-80 max-w-[85%] mx-auto mb-12"
           />
           
           <Link 

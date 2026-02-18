@@ -24,13 +24,15 @@ export function ServiceSelect({ services, selectedServices, loading, onToggle }:
 
   const getServiceDescription = (name: string) => {
     const descriptions: Record<string, string> = {
-      'Corte Clássico': 'Corte tradicional com máquina e tesoura',
+      'Corte de Cabelo': 'Corte tradicional com máquina e tesoura',
       'Barba': 'Aparo e modelagem completa da barba',
-      'Corte + Barba': 'Combo completo para um visual impecável',
-      'Pigmentação': 'Tingimento capilar profissional',
-      'Hidratação': 'Tratamento capilar hidratante',
+      'Corte de Cabelo + Barba': 'Combo completo para um visual impecável',
+      'Corte + Hidratação': 'Corte e tratamento capilar hidratante',
+      'Corte + Barba + Hidratação': 'Pacote completo de cuidados para cabelo e barba',
+      'Pézinho': 'Acabamento e contorno do cabelo',
+      'Sobrancelha': 'Design e limpeza da sobrancelha',
     }
-    return descriptions[name] || 'Serviço profissional'
+    return descriptions[name] || 'Serviço profissional de barbearia'
   }
 
   const isPopular = (name: string) => {
