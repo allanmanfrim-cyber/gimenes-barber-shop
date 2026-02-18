@@ -37,11 +37,6 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/business-hours', businessHoursRoutes)
 app.use('/api/payments', paymentsRoutes)
 
-// Rota de Healthcheck na raiz
-app.get('/', (_req, res) => {
-  res.send('Gimenes Barber Shop API is running')
-})
-
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
