@@ -112,7 +112,7 @@ export function ClientForm({
             <MapPin className="w-5 h-5 text-dark-400 mt-0.5" />
             <div>
               <p className="text-sm text-dark-400">Endereço</p>
-              <p className="text-dark-900">Rua dos Barbeiros, 123 - Centro, São Paulo - SP</p>
+              <p className="text-dark-900">Rua Ademar de Barros, 278 - Centro - José Bonifácio/SP</p>
             </div>
           </div>
         </div>
