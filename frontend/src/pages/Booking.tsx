@@ -6,6 +6,7 @@ import { ServiceSelect } from '../components/booking/ServiceSelect'
 import { BarberSelect } from '../components/booking/BarberSelect'
 import { DateTimeSelect } from '../components/booking/DateTimeSelect'
 import { ClientForm } from '../components/booking/ClientForm'
+import { ReferenceImageUpload } from '../components/booking/ReferenceImageUpload'
 import { PaymentSelect } from '../components/booking/PaymentSelect'
 import { PixPayment } from '../components/booking/PixPayment'
 import { NubankPayment } from '../components/booking/NubankPayment'
@@ -32,6 +33,8 @@ export default function Booking() {
     selectBarber,
     selectDateTime,
     setClientInfo,
+    confirmClientInfo,
+    setReferenceImages,
     setPaymentMethod,
     submitBooking,
     goToConfirmation,
@@ -44,23 +47,22 @@ export default function Booking() {
     loadBarbers()
   }, [loadServices, loadBarbers])
 
-  const stepTitles: Record<number, string> = {
-    1: 'Servico',
-    2: 'Barbeiro',
-    3: 'Data e Horario',
+  const stepTitles: Record<number | string, string> = {
+    1: 'Barbeiro',
+    2: 'Serviço',
+    3: 'Data e Horário',
     4: 'Seus Dados',
+    4.5: 'Fotos de Referência',
     5: 'Pagamento',
     6: 'Pagamento via Pix',
     7: 'Pagamento via Nubank',
-    8: 'Adicionar Cartao',
-    9: 'Confirmacao'
+    8: 'Adicionar Cartão',
+    9: 'Confirmação'
   }
 
   const handleBack = () => {
     if (step === 1) {
       navigate('/')
-    } else if (step >= 6 && step <= 8) {
-      goBack()
     } else {
       goBack()
     }
@@ -106,7 +108,7 @@ export default function Booking() {
           </h2>
         )}
         
-        {showStepper && <BookingStepper currentStep={Math.min(step, 5)} totalSteps={5} />}
+        {showStepper && <BookingStepper currentStep={step > 4 ? Math.floor(Number(step)) + 1 : Number(step)} totalSteps={6} />}
       </div>
 
       {error && (
@@ -116,18 +118,18 @@ export default function Booking() {
       )}
 
       {step === 1 && (
-        <ServiceSelect
-          services={services}
-          loading={loading}
-          onSelect={selectService}
-        />
-      )}
-
-      {step === 2 && (
         <BarberSelect
           barbers={barbers}
           loading={loading}
           onSelect={selectBarber}
+        />
+      )}
+
+      {step === 2 && (
+        <ServiceSelect
+          services={services}
+          loading={loading}
+          onSelect={selectService}
         />
       )}
 
@@ -148,8 +150,20 @@ export default function Booking() {
           initialName={bookingData.clientName}
           initialWhatsapp={bookingData.clientWhatsapp}
           initialEmail={bookingData.clientEmail}
+          initialBirthDate={bookingData.clientBirthDate}
           initialNotes={bookingData.notes}
-          onSubmit={setClientInfo}
+          onSubmit={(name, whatsapp, email, birthDate, notes) => {
+            setClientInfo(name, whatsapp, email, birthDate, notes)
+            confirmClientInfo()
+          }}
+        />
+      )}
+
+      {step === 4.5 && (
+        <ReferenceImageUpload
+          onImagesSelected={setReferenceImages}
+          onNext={() => setPaymentMethod('pix', 'online')} // Default para proxima tela
+          onBack={handleBack}
         />
       )}
 
@@ -197,8 +211,6 @@ export default function Booking() {
       {step === 9 && appointmentResult && (
         <Confirmation
           appointment={appointmentResult.appointment}
-          pixCode={undefined}
-          pixQrCodeBase64={undefined}
           onFinish={handleFinish}
         />
       )}

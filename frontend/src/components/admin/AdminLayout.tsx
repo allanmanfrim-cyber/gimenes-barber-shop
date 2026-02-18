@@ -12,7 +12,9 @@ import {
   LogOut,
   Menu,
   X,
-  ShieldAlert
+  ShieldAlert,
+  RefreshCcw,
+  Gift
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -26,6 +28,8 @@ const menuItems = [
   { path: '/admin/agendamentos', label: 'Agendamentos', icon: Calendar },
   { path: '/admin/servicos', label: 'Servicos', icon: Scissors },
   { path: '/admin/barbeiros', label: 'Barbeiros', icon: Users },
+  { path: '/admin/recuperar-clientes', label: 'Recuperar Clientes', icon: RefreshCcw },
+  { path: '/admin/aniversariantes', label: 'Aniversariantes', icon: Gift },
   { path: '/admin/pagamentos', label: 'Pagamentos', icon: CreditCard },
   { path: '/admin/notificacoes', label: 'Notificacoes', icon: Bell },
   { path: '/admin/configuracoes', label: 'Configuracoes', icon: Settings }

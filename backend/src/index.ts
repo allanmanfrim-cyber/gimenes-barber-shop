@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.js'
 import adminRoutes from './routes/admin.js'
 import businessHoursRoutes from './routes/businessHours.js'
 import paymentsRoutes from './routes/payments.js'
+import { setupBirthdayAutomation } from './services/birthdayService.js'
 
 const dataDir = path.join(process.cwd(), 'data')
 
@@ -20,7 +21,11 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true })
 }
 
+// Inicializa o banco (que já chama as migrações internamente)
 initDatabase()
+
+// Configura automações
+setupBirthdayAutomation()
 
 const app = express()
 const PORT = process.env.PORT || 3001

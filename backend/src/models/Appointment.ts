@@ -12,6 +12,7 @@ export interface Appointment {
   date_time: string
   status: string
   notes: string | null
+  reference_images: string | null
   created_at: string
   client?: Client
   barber?: Barber
@@ -24,8 +25,9 @@ export const AppointmentModel = {
     let query = `
       SELECT 
         a.*,
-        c.name as client_name, c.whatsapp as client_whatsapp,
-        b.name as barber_name,
+        c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email,
+        c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
+        b.name as barber_name, b.whatsapp as barber_whatsapp,
         s.name as service_name, s.duration_minutes, s.price,
         p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
@@ -60,8 +62,9 @@ export const AppointmentModel = {
     const row = db.prepare(`
       SELECT 
         a.*,
-        c.name as client_name, c.whatsapp as client_whatsapp,
-        b.name as barber_name,
+        c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email,
+        c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
+        b.name as barber_name, b.whatsapp as barber_whatsapp,
         s.name as service_name, s.duration_minutes, s.price,
         p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
@@ -106,11 +109,19 @@ export const AppointmentModel = {
     serviceId: number
     dateTime: string
     notes?: string
+    referenceImages?: string[]
   }): Appointment => {
     const result = db.prepare(`
-      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, status)
-      VALUES (?, ?, ?, ?, ?, 'confirmed')
-    `).run(data.clientId, data.barberId, data.serviceId, data.dateTime, data.notes || null)
+      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, reference_images, status)
+      VALUES (?, ?, ?, ?, ?, ?, 'confirmed')
+    `).run(
+      data.clientId, 
+      data.barberId, 
+      data.serviceId, 
+      data.dateTime, 
+      data.notes || null,
+      data.referenceImages ? JSON.stringify(data.referenceImages) : null
+    )
     
     return AppointmentModel.findById(result.lastInsertRowid as number)!
   },
@@ -150,18 +161,22 @@ function formatAppointmentRow(row: any): Appointment {
     date_time: row.date_time,
     status: row.status,
     notes: row.notes,
+    reference_images: row.reference_images,
     created_at: row.created_at,
     client: row.client_name ? {
       id: row.client_id,
       name: row.client_name,
       whatsapp: row.client_whatsapp,
-      email: null,
+      email: row.client_email,
+      data_nascimento: row.data_nascimento,
+      faltas_sem_aviso: row.faltas_sem_aviso,
+      status_multa: row.status_multa,
       created_at: ''
     } : undefined,
     barber: row.barber_name ? {
       id: row.barber_id,
       name: row.barber_name,
-      whatsapp: null,
+      whatsapp: row.barber_whatsapp,
       email: null,
       active: 1,
       created_at: ''

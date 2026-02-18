@@ -19,6 +19,9 @@ export interface Client {
   name: string
   whatsapp: string
   email?: string
+  data_nascimento?: string
+  faltas_sem_aviso?: number
+  status_multa?: 'nenhuma' | 'ativa' | 'paga' | 'pendente'
   created_at: string
 }
 
@@ -30,13 +33,14 @@ export interface Appointment {
   date_time: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   notes?: string
+  reference_images?: string
   client?: Client
   barber?: Barber
   service?: Service
   payment?: Payment
 }
 
-export type PaymentMethod = 'pix' | 'nubank' | 'card' | 'machine' | 'cash'
+export type PaymentMethod = 'pix' | 'nubank' | 'card' | 'machine' | 'cash' | 'local'
 export type PaymentType = 'online' | 'presencial'
 export type PaymentStatus = 'pending' | 'paid_pix' | 'paid_card' | 'paid_nubank' | 'pay_on_site' | 'cancelled'
 
@@ -71,7 +75,9 @@ export interface BookingData {
   clientName: string
   clientWhatsapp: string
   clientEmail: string
+  clientBirthDate: string
   notes: string
+  referenceImages: string[]
   paymentMethod: PaymentMethod
   paymentType: PaymentType
 }

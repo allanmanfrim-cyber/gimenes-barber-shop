@@ -7,6 +7,8 @@ import { PaymentModel } from '../models/Payment.js'
 import { BusinessHoursModel } from '../models/BusinessHours.js'
 import { NotificationModel } from '../models/Notification.js'
 import { notifyAppointmentCancelled, notifyAppointmentChanged, notifyAppointmentConfirmed } from '../services/notificationService.js'
+import { PaymentSettingsModel } from '../models/PaymentSettings.js'
+import { ClientModel } from '../models/Client.js'
 
 const router = Router()
 
@@ -228,6 +230,59 @@ router.put('/business-hours', (req, res) => {
     res.json({ hours: updatedHours })
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar horarios' })
+  }
+})
+
+router.get('/payment-settings', (_req, res) => {
+  try {
+    const settings = PaymentSettingsModel.getAll()
+    res.json({ settings })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar configuracoes de pagamento' })
+  }
+})
+
+router.put('/payment-settings', (req, res) => {
+  try {
+    const { settings } = req.body
+    if (!settings || typeof settings !== 'object') {
+      return res.status(400).json({ message: 'Dados invalidos' })
+    }
+    PaymentSettingsModel.setMultiple(settings)
+    const updatedSettings = PaymentSettingsModel.getAll()
+    res.json({ settings: updatedSettings })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao atualizar configuracoes de pagamento' })
+  }
+})
+
+router.get('/inactive-clients', (req, res) => {
+  try {
+    const days = parseInt(req.query.days as string) || 30
+    const clients = ClientModel.findInactive(days)
+    res.json({ clients })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar clientes inativos' })
+  }
+})
+
+router.get('/birthday-clients', (req, res) => {
+  try {
+    const { date } = req.query
+    const clients = ClientModel.findBirthdays(date as string)
+    res.json({ clients })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar clientes aniversariantes' })
+  }
+})
+
+router.post('/clients/:id/no-show', (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+    ClientModel.addNoShow(id)
+    res.json({ message: 'Falta registrada com sucesso' })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao registrar falta' })
   }
 })
 
