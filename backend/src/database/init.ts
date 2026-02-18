@@ -1,8 +1,14 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import bcrypt from 'bcryptjs'
+import fs from 'fs'
 
-const dbPath = path.join(process.cwd(), 'data/barbershop.db')
+const dataDir = path.join(process.cwd(), 'data')
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true })
+}
+
+const dbPath = path.join(dataDir, 'barbershop.db')
 
 export const db = new Database(dbPath)
 

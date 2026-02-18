@@ -48,11 +48,14 @@ app.get('/api/health', (_req, res) => {
 
 // Servir arquivos do frontend
 const frontendDist = path.join(process.cwd(), '../frontend/dist')
-if (fs.existsSync(frontendDist)) {
-  app.use(express.static(frontendDist))
+const alternativeFrontendDist = path.join(process.cwd(), 'frontend/dist')
+const targetDist = fs.existsSync(frontendDist) ? frontendDist : alternativeFrontendDist
+
+if (fs.existsSync(targetDist)) {
+  app.use(express.static(targetDist))
   // Qualquer rota que não seja API, manda o index.html do frontend
   app.get(/^(?!\/api).+/, (_req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'))
+    res.sendFile(path.join(targetDist, 'index.html'))
   })
 }
 
