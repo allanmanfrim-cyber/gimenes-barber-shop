@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { User, Camera, Phone } from 'lucide-react'
+import { api } from '../../services/api'
 
 export default function AdminProfile() {
   const { user } = useAuth()
@@ -16,23 +17,23 @@ export default function AdminProfile() {
   })
 
   useEffect(() => {
-    if (user && 'barberId' in user && user.barberId) {
-      loadProfile()
+    const u = user as any
+    if (u && u.barberId) {
+      loadProfile(u.barberId)
     } else {
       setLoading(false)
     }
   }, [user])
 
-  const loadProfile = async () => {
+  const loadProfile = async (barberId: number) => {
     try {
-      const response = await fetch(`/api/admin/barbers`)
-      const data = await response.json()
-      const myBarber = data.barbers.find((b: any) => b.id === (user as any)?.barberId)
+      const data = await api.barbers.listAll()
+      const myBarber = data.barbers.find((b: any) => b.id === barberId)
       if (myBarber) {
         setProfile({
           name: myBarber.name,
-          phone: myBarber.phone || '',
-          photo_url: myBarber.photo_url || ''
+          phone: myBarber.whatsapp || '',
+          photo_url: (myBarber as any).photo_url || ''
         })
       }
     } catch (error) {
@@ -44,27 +45,19 @@ export default function AdminProfile() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !('barberId' in user) || !user.barberId) {
+    const u = user as any
+    if (!u || !u.barberId) {
       alert('Erro: ID do barbeiro não encontrado')
       return
     }
     
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/barbers/${user.barberId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(profile)
+      await api.barbers.update(u.barberId, {
+        name: profile.name,
+        whatsapp: profile.phone
       })
-
-      if (response.ok) {
-        alert('Perfil atualizado com sucesso!')
-      } else {
-        alert('Erro ao atualizar perfil')
-      }
+      alert('Perfil atualizado com sucesso!')
     } catch (error) {
       console.error('Error updating profile:', error)
       alert('Erro ao atualizar perfil')
@@ -99,11 +92,11 @@ export default function AdminProfile() {
           ) : (
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-dark-300 text-sm mb-2">Nome Publico</label>
+                <label className="block text-dark-300 text-sm mb-2">Nome Público</label>
                 <Input 
                   value={profile.name}
                   onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Como o cliente vera seu nome"
+                  placeholder="Como o cliente verá seu nome"
                 />
               </div>
               <div>
@@ -130,7 +123,7 @@ export default function AdminProfile() {
 
               <div className="pt-6">
                 <Button type="submit" fullWidth loading={saving}>
-                  Salvar Alteracoes
+                  Salvar Alterações
                 </Button>
               </div>
             </form>

@@ -6,12 +6,24 @@ import { PaymentModel, PaymentMethod } from '../models/Payment.js'
 import { findAvailableBarber } from '../utils/timeSlots.js'
 import { MercadoPagoService } from '../services/mercadoPagoService.js'
 import { notifyAppointmentConfirmed } from '../services/notificationService.js'
+import { WhatsAppService } from '../services/whatsappService.js'
 
 const router = Router()
 
 router.post('/', async (req, res) => {
   try {
-    const { serviceId, barberId, dateTime, clientName, clientWhatsapp, clientEmail, notes, paymentMethod } = req.body
+    const { 
+      serviceId, 
+      barberId, 
+      dateTime, 
+      clientName, 
+      clientWhatsapp, 
+      clientEmail,
+      clientBirthDate, 
+      notes, 
+      referenceImages, 
+      paymentMethod 
+    } = req.body
 
     if (!serviceId || !dateTime || !clientName || !clientWhatsapp || !paymentMethod) {
       return res.status(400).json({ message: 'Dados incompletos' })
@@ -40,14 +52,15 @@ router.post('/', async (req, res) => {
       finalBarberId = barberId
     }
 
-    const client = ClientModel.findOrCreate(clientName, clientWhatsapp, clientEmail)
+    const client = ClientModel.findOrCreate(clientName, clientWhatsapp, clientEmail, clientBirthDate)
 
     const appointment = AppointmentModel.create({
       clientId: client.id,
       barberId: finalBarberId,
       serviceId,
       dateTime,
-      notes
+      notes,
+      referenceImages
     })
 
     let pixCode: string | undefined
@@ -56,14 +69,13 @@ router.post('/', async (req, res) => {
     let externalReference: string | undefined
 
     const method = paymentMethod as PaymentMethod
-
     const isPresencial = method === 'local' || method === 'machine' || method === 'cash'
 
     if (method === 'pix' || method === 'nubank') {
       const pixResult = await MercadoPagoService.createPixPayment(
         service.price, 
         appointment.id, 
-        clientEmail
+        clientEmail || 'cliente@exemplo.com'
       )
       pixCode = pixResult.qrCode
       pixQrCodeBase64 = pixResult.qrCodeBase64
@@ -73,7 +85,7 @@ router.post('/', async (req, res) => {
         service.price,
         appointment.id,
         service.name,
-        clientEmail
+        clientEmail || 'cliente@exemplo.com'
       )
       checkoutUrl = cardResult.initPoint
       externalReference = cardResult.externalReference
@@ -89,8 +101,13 @@ router.post('/', async (req, res) => {
 
     const fullAppointment = AppointmentModel.findById(appointment.id)
 
-    if (isPresencial && fullAppointment) {
-      await notifyAppointmentConfirmed(fullAppointment)
+    // Envia confirmacoes
+    if (fullAppointment) {
+      if (isPresencial) {
+        await notifyAppointmentConfirmed(fullAppointment)
+      }
+      // Sempre tenta enviar WhatsApp (mesmo se pendente de pagamento online)
+      await WhatsAppService.sendConfirmation(appointment.id)
     }
 
     res.status(201).json({

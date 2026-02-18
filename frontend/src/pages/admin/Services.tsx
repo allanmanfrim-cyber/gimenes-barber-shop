@@ -24,12 +24,7 @@ export default function AdminServices() {
 
   const loadServices = async () => {
     try {
-      const response = await fetch('/api/admin/services', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      })
-      const data = await response.json()
+      const data = await api.services.list()
       setServices(data.services)
     } catch (error) {
       console.error('Error loading services:', error)

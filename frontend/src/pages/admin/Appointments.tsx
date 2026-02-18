@@ -57,13 +57,24 @@ export default function AdminAppointments() {
   }
 
   const handleCancel = async (id: number) => {
-    if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return
+    if (!confirm('Deseja realmente cancelar este agendamento?')) return
     try {
       await api.appointments.cancel(id)
       loadAppointments()
       setSelectedAppointment(null)
     } catch (error) {
-      console.error('Error canceling appointment:', error)
+      console.error('Error cancelling appointment:', error)
+    }
+  }
+
+  const handleNoShow = async (id: number, clientId: number) => {
+    if (!confirm('Registrar falta para este cliente? Isso aumentará o contador de faltas e aplicará a regra de multa.')) return
+    try {
+      await api.admin.registerNoShow(clientId)
+      await handleStatusChange(id, 'cancelled')
+      alert('Falta registrada e agendamento cancelado.')
+    } catch (error) {
+      console.error('Error registering no-show:', error)
     }
   }
 
@@ -218,6 +229,14 @@ export default function AdminAppointments() {
                 )}
                 <Button
                   variant="danger"
+                  fullWidth
+                  onClick={() => handleNoShow(selectedAppointment.id, selectedAppointment.client_id)}
+                >
+                  <X className="w-4 h-4" />
+                  Registrar Falta
+                </Button>
+                <Button
+                  variant="secondary"
                   fullWidth
                   onClick={() => handleCancel(selectedAppointment.id)}
                 >

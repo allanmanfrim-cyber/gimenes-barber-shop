@@ -59,7 +59,9 @@ export const api = {
       clientName: string
       clientWhatsapp: string
       clientEmail?: string
+      clientBirthDate: string
       notes?: string
+      referenceImages?: string[]
       paymentMethod: import('../types').PaymentMethod
     }) => fetchApi<{ 
       appointment: import('../types').Appointment
@@ -114,5 +116,17 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ username, password })
       })
+  },
+
+  admin: {
+    inactiveClients: (days: number) => 
+      fetchApi<{ clients: any[] }>(`/admin/inactive-clients?days=${days}`),
+    birthdayClients: (date?: string) => {
+      const params = new URLSearchParams()
+      if (date) params.append('date', date)
+      return fetchApi<{ clients: any[] }>(`/admin/birthday-clients?${params}`)
+    },
+    registerNoShow: (clientId: number) =>
+      fetchApi(`/admin/clients/${clientId}/no-show`, { method: 'POST' })
   }
 }

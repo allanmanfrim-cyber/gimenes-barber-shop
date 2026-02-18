@@ -2,6 +2,7 @@ import Database from 'better-sqlite3'
 import path from 'path'
 import bcrypt from 'bcryptjs'
 import fs from 'fs'
+import { applyMigrations } from './migrations.js'
 
 const dataDir = path.join(process.cwd(), 'data')
 if (!fs.existsSync(dataDir)) {
@@ -96,6 +97,16 @@ export function initDatabase() {
       is_open INTEGER DEFAULT 1
     );
 
+    CREATE TABLE IF NOT EXISTS notification_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL,
+      client_id INTEGER,
+      message TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (client_id) REFERENCES clients (id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date_time);
     CREATE INDEX IF NOT EXISTS idx_appointments_barber ON appointments(barber_id);
     CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
@@ -104,6 +115,7 @@ export function initDatabase() {
   `)
 
   runMigrations()
+  applyMigrations()
   seedTestUsers()
 
   console.log('Database initialized successfully')

@@ -8,6 +8,8 @@ import AdminDashboard from './pages/admin/Dashboard'
 import AdminAppointments from './pages/admin/Appointments'
 import AdminServices from './pages/admin/Services'
 import AdminBarbers from './pages/admin/Barbers'
+import AdminCustomerRecovery from './pages/admin/CustomerRecovery'
+import AdminBirthdays from './pages/admin/Birthdays'
 import AdminPayments from './pages/admin/Payments'
 import AdminNotifications from './pages/admin/Notifications'
 import AdminSettings from './pages/admin/Settings'
@@ -24,6 +26,8 @@ function App() {
           <Route path="/admin/agendamentos" element={<AdminAppointments />} />
           <Route path="/admin/servicos" element={<AdminServices />} />
           <Route path="/admin/barbeiros" element={<AdminBarbers />} />
+          <Route path="/admin/recuperar-clientes" element={<AdminCustomerRecovery />} />
+          <Route path="/admin/aniversariantes" element={<AdminBirthdays />} />
           <Route path="/admin/pagamentos" element={<AdminPayments />} />
           <Route path="/admin/notificacoes" element={<AdminNotifications />} />
           <Route path="/admin/configuracoes" element={<AdminSettings />} />
