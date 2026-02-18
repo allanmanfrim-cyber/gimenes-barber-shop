@@ -16,8 +16,10 @@ export default function AdminProfile() {
   })
 
   useEffect(() => {
-    if (user?.barberId) {
+    if (user && 'barberId' in user && user.barberId) {
       loadProfile()
+    } else {
+      setLoading(false)
     }
   }, [user])
 
@@ -25,7 +27,7 @@ export default function AdminProfile() {
     try {
       const response = await fetch(`/api/admin/barbers`)
       const data = await response.json()
-      const myBarber = data.barbers.find((b: any) => b.id === user?.barberId)
+      const myBarber = data.barbers.find((b: any) => b.id === (user as any)?.barberId)
       if (myBarber) {
         setProfile({
           name: myBarber.name,
@@ -42,9 +44,14 @@ export default function AdminProfile() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user || !('barberId' in user) || !user.barberId) {
+      alert('Erro: ID do barbeiro não encontrado')
+      return
+    }
+    
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/barbers/${user?.barberId}`, {
+      const response = await fetch(`/api/admin/barbers/${user.barberId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

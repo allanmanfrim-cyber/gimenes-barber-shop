@@ -80,6 +80,7 @@ export interface User {
   id: number
   username: string
   role: string
+  barberId?: number
 }
 
 export interface AuthState {
