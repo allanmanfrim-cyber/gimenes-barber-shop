@@ -14,11 +14,14 @@ if (!fs.existsSync(dataDir)) {
 initDatabase()
 
 const services = [
-  { name: 'Cabelo Masculino', duration_minutes: 30, price: 45.00 },
+  { name: 'Corte de Cabelo', duration_minutes: 30, price: 40.00 },
   { name: 'Barba', duration_minutes: 20, price: 30.00 },
-  { name: 'Corte + Barba', duration_minutes: 45, price: 65.00 },
-  { name: 'Pigmentacao', duration_minutes: 40, price: 80.00 },
-  { name: 'Sobrancelha', duration_minutes: 10, price: 15.00 }
+  { name: 'Corte de Cabelo + Barba', duration_minutes: 45, price: 60.00 },
+  { name: 'Corte + Hidratação', duration_minutes: 50, price: 60.00 },
+  { name: 'Corte + Barba + Hidratação', duration_minutes: 60, price: 75.00 },
+  { name: 'Pézinho', duration_minutes: 15, price: 15.00 },
+  { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },
+  { name: 'Só Hidratação', duration_minutes: 30, price: 25.00 }
 ]
 
 const barbers = [
@@ -36,15 +39,12 @@ const businessHours = [
   { day_of_week: 6, open_time: '08:00', close_time: '18:00', is_open: 1 }
 ]
 
-const existingServices = db.prepare('SELECT COUNT(*) as count FROM services').get() as { count: number }
-
-if (existingServices.count === 0) {
-  const insertService = db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)')
-  for (const service of services) {
-    insertService.run(service.name, service.duration_minutes, service.price)
-  }
-  console.log('Services seeded')
+db.prepare('DELETE FROM services').run()
+const insertService = db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)')
+for (const service of services) {
+  insertService.run(service.name, service.duration_minutes, service.price)
 }
+console.log('Services seeded')
 
 const existingBarbers = db.prepare('SELECT COUNT(*) as count FROM barbers').get() as { count: number }
 
