@@ -3,6 +3,7 @@ import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
+import cron from 'node-cron'
 
 import { initDatabase } from './database/init.js'
 import servicesRoutes from './routes/services.js'
@@ -12,6 +13,7 @@ import appointmentsRoutes from './routes/appointments.js'
 import authRoutes from './routes/auth.js'
 import adminRoutes from './routes/admin.js'
 import businessHoursRoutes from './routes/businessHours.js'
+import { sendDailyReport } from './services/dailyReport.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dataDir = path.join(__dirname, '../data')
@@ -69,4 +71,16 @@ app.get('/api/health', (_req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`)
   console.log(`Environment: ${process.env.NODE_ENV}`)
+
+  cron.schedule('0 21 * * *', async () => {
+    console.log('Running daily report...')
+    try {
+      await sendDailyReport()
+    } catch (error) {
+      console.error('Error sending daily report:', error)
+    }
+  }, {
+    timezone: 'America/Sao_Paulo'
+  })
+  console.log('Daily report scheduled for 21:00 (Sao Paulo time)')
 })
