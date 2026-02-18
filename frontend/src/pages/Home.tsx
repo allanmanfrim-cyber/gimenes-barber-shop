@@ -1,15 +1,28 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Scissors, Clock, MapPin, Instagram, Phone } from 'lucide-react'
-
-const services = [
-  { name: 'Corte de Cabelo', price: 'R$ 45,00', description: 'Corte moderno e clássico' },
-  { name: 'Barba', price: 'R$ 30,00', description: 'Design e cuidado com a barba' },
-  { name: 'Corte + Barba', price: 'R$ 60,00', description: 'O visual completo para o seu dia' },
-  { name: 'Pigmentação', price: 'R$ 30,00', description: 'Realce o contorno do seu corte' },
-]
+import { api } from '../services/api'
+import { Service } from '../types'
 
 export default function Home() {
+  const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadServices() {
+      try {
+        const data = await api.services.list()
+        setServices(data.services)
+      } catch (error) {
+        console.error('Error loading services:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadServices()
+  }, [])
+
   return (
     <div className="min-h-screen bg-dark-950 flex flex-col">
       {/* Hero Section */}
@@ -59,27 +72,35 @@ export default function Home() {
           </h2>
           
           <div className="space-y-6">
-            {services.map((service) => (
-              <div 
-                key={service.name} 
-                className="group flex justify-between items-center p-4 rounded-2xl hover:bg-dark-800 transition-colors border border-transparent hover:border-dark-700"
-              >
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-base font-bold text-white">{service.name}</h3>
-                    {service.name === 'Corte + Barba' && (
-                      <span className="text-[10px] bg-primary-500 text-dark-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                        Indicado
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-dark-400 mt-1">{service.description}</p>
-                </div>
-                <span className="text-base font-bold text-primary-500 ml-4">
-                  {service.price}
-                </span>
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
               </div>
-            ))}
+            ) : services.length > 0 ? (
+              services.map((service) => (
+                <div 
+                  key={service.id} 
+                  className="group flex justify-between items-center p-4 rounded-2xl hover:bg-dark-800 transition-colors border border-transparent hover:border-dark-700"
+                >
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-base font-bold text-white">{service.name}</h3>
+                      {service.name.toLowerCase().includes('combo') && (
+                        <span className="text-[10px] bg-primary-500 text-dark-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          Indicado
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-dark-400 mt-1">{service.duration_minutes} minutos</p>
+                  </div>
+                  <span className="text-base font-bold text-primary-500 ml-4">
+                    R$ {Number(service.price).toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-dark-500 text-center py-10 italic">Nenhum serviço disponível no momento.</p>
+            )}
           </div>
         </div>
       </section>
