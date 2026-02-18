@@ -6,7 +6,6 @@ export interface User {
   username: string
   password_hash: string
   role: string
-  barber_id: number | null
   created_at: string
 }
 
@@ -23,7 +22,14 @@ export const UserModel = {
     return bcrypt.compareSync(password, user.password_hash)
   },
 
-  create: (username: string, passwordHash: string, role: string, barberId: number | null = null): void => {
-    db.prepare('INSERT INTO users (username, password_hash, role, barber_id) VALUES (?, ?, ?, ?)').run(username, passwordHash, role, barberId)
+  create: (username: string, password: string, role: string = 'client'): User => {
+    const passwordHash = bcrypt.hashSync(password, 10)
+    const result = db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)').run(username, passwordHash, role)
+    return UserModel.findById(result.lastInsertRowid as number)!
+  },
+
+  exists: (username: string): boolean => {
+    const user = db.prepare('SELECT id FROM users WHERE username = ?').get(username)
+    return !!user
   }
 }

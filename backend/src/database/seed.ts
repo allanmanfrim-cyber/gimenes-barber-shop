@@ -14,44 +14,44 @@ if (!fs.existsSync(dataDir)) {
 initDatabase()
 
 const services = [
-  { name: 'Corte de Cabelo', duration_minutes: 30, price: 40.00 },
+  { name: 'Corte Masculino', duration_minutes: 30, price: 45.00 },
   { name: 'Barba', duration_minutes: 20, price: 30.00 },
-  { name: 'Corte de Cabelo + Barba', duration_minutes: 45, price: 60.00 },
-  { name: 'Corte + Hidratação', duration_minutes: 50, price: 60.00 },
-  { name: 'Corte + Barba + Hidratação', duration_minutes: 60, price: 75.00 },
-  { name: 'Pézinho', duration_minutes: 15, price: 15.00 },
-  { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },
-  { name: 'Só Hidratação', duration_minutes: 30, price: 25.00 }
+  { name: 'Corte + Barba', duration_minutes: 45, price: 65.00 },
+  { name: 'Sobrancelha', duration_minutes: 10, price: 15.00 },
+  { name: 'Pigmentacao', duration_minutes: 40, price: 80.00 }
 ]
 
 const barbers = [
-  { name: 'Junior Gimenes', phone: '(17) 99219-5185' },
-  { name: 'Abner William', phone: '(17) 98112-8073' }
+  { name: 'Carlos Gimenes' },
+  { name: 'Rafael Santos' }
 ]
 
 const businessHours = [
   { day_of_week: 0, open_time: '00:00', close_time: '00:00', is_open: 0 },
-  { day_of_week: 1, open_time: '09:00', close_time: '20:00', is_open: 1 },
-  { day_of_week: 2, open_time: '09:00', close_time: '20:00', is_open: 1 },
-  { day_of_week: 3, open_time: '09:00', close_time: '20:00', is_open: 1 },
-  { day_of_week: 4, open_time: '09:00', close_time: '20:00', is_open: 1 },
-  { day_of_week: 5, open_time: '09:00', close_time: '20:00', is_open: 1 },
-  { day_of_week: 6, open_time: '08:00', close_time: '18:00', is_open: 1 }
+  { day_of_week: 1, open_time: '09:00', close_time: '19:00', is_open: 1 },
+  { day_of_week: 2, open_time: '09:00', close_time: '19:00', is_open: 1 },
+  { day_of_week: 3, open_time: '09:00', close_time: '19:00', is_open: 1 },
+  { day_of_week: 4, open_time: '09:00', close_time: '19:00', is_open: 1 },
+  { day_of_week: 5, open_time: '09:00', close_time: '19:00', is_open: 1 },
+  { day_of_week: 6, open_time: '09:00', close_time: '17:00', is_open: 1 }
 ]
 
-db.prepare('DELETE FROM services').run()
-const insertService = db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)')
-for (const service of services) {
-  insertService.run(service.name, service.duration_minutes, service.price)
+const existingServices = db.prepare('SELECT COUNT(*) as count FROM services').get() as { count: number }
+
+if (existingServices.count === 0) {
+  const insertService = db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)')
+  for (const service of services) {
+    insertService.run(service.name, service.duration_minutes, service.price)
+  }
+  console.log('Services seeded')
 }
-console.log('Services seeded')
 
 const existingBarbers = db.prepare('SELECT COUNT(*) as count FROM barbers').get() as { count: number }
 
 if (existingBarbers.count === 0) {
-  const insertBarber = db.prepare('INSERT INTO barbers (name, phone) VALUES (?, ?)')
+  const insertBarber = db.prepare('INSERT INTO barbers (name) VALUES (?)')
   for (const barber of barbers) {
-    insertBarber.run(barber.name, barber.phone)
+    insertBarber.run(barber.name)
   }
   console.log('Barbers seeded')
 }
@@ -71,17 +71,6 @@ const existingUsers = db.prepare('SELECT COUNT(*) as count FROM users').get() as
 if (existingUsers.count === 0) {
   const passwordHash = bcrypt.hashSync('admin123', 10)
   db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)').run('admin', passwordHash, 'admin')
-  
-  // Criar usuarios para os barbeiros
-  const barberList = db.prepare('SELECT id, name FROM barbers').all() as { id: number, name: string }[]
-  for (const barber of barberList) {
-    const username = barber.name.split(' ')[0].toLowerCase()
-    const barberPass = bcrypt.hashSync(`${username}123`, 10)
-    db.prepare('INSERT INTO users (username, password_hash, role, barber_id) VALUES (?, ?, ?, ?)')
-      .run(username, barberPass, 'barber', barber.id)
-    console.log(`User created for barber ${barber.name} (username: ${username}, password: ${username}123)`)
-  }
-  
   console.log('Admin user created (username: admin, password: admin123)')
 }
 

@@ -1,26 +1,30 @@
 interface BookingStepperProps {
   currentStep: number
   totalSteps: number
-  stepTitle?: string
 }
 
-export function BookingStepper({ currentStep, totalSteps, stepTitle }: BookingStepperProps) {
-  const progress = (currentStep / totalSteps) * 100
-
+export function BookingStepper({ currentStep, totalSteps }: BookingStepperProps) {
   return (
-    <div className="bg-white px-4 py-3 border-b border-gray-100">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-dark-500">Passo {currentStep} de {totalSteps}</span>
-        {stepTitle && (
-          <span className="text-sm text-dark-400">{stepTitle}</span>
-        )}
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-1.5">
-        <div 
-          className="bg-green-700 h-1.5 rounded-full transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+    <div className="flex items-center gap-2">
+      {Array.from({ length: totalSteps }).map((_, index) => {
+        const stepNumber = index + 1
+        const isActive = stepNumber === currentStep
+        const isCompleted = stepNumber < currentStep
+
+        return (
+          <div key={stepNumber} className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full transition-all ${
+                isActive
+                  ? 'bg-primary-500 w-4'
+                  : isCompleted
+                  ? 'bg-primary-500'
+                  : 'bg-dark-600'
+              }`}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }

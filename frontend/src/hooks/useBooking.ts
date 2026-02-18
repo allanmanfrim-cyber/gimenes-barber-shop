@@ -1,17 +1,19 @@
 import { useState, useCallback } from 'react'
-import { BookingData, Service, Barber, TimeSlot } from '../types'
+import { BookingData, Service, Barber, TimeSlot, PaymentMethod, PaymentType } from '../types'
 import { api } from '../services/api'
 import { format } from 'date-fns'
 
 const initialBookingData: BookingData = {
-  services: [],
+  service: null,
   barber: null,
   date: '',
   time: '',
   clientName: '',
   clientWhatsapp: '',
+  clientEmail: '',
   notes: '',
-  paymentMethod: 'local'
+  paymentMethod: 'pix',
+  paymentType: 'online'
 }
 
 export function useBooking() {
@@ -25,6 +27,8 @@ export function useBooking() {
   const [appointmentResult, setAppointmentResult] = useState<{
     appointment: import('../types').Appointment
     pixCode?: string
+    pixQrCodeBase64?: string
+    checkoutUrl?: string
   } | null>(null)
 
   const loadServices = useCallback(async () => {
@@ -33,7 +37,7 @@ export function useBooking() {
       const { services } = await api.services.list()
       setServices(services.filter(s => s.active))
     } catch {
-      setError('Erro ao carregar serviços')
+      setError('Erro ao carregar servicos')
     } finally {
       setLoading(false)
     }
@@ -52,40 +56,28 @@ export function useBooking() {
   }, [])
 
   const loadAvailability = useCallback(async (barberId: number | 'any', date: Date) => {
-    if (bookingData.services.length === 0) return
+    if (!bookingData.service) return
     setLoading(true)
     try {
       const dateStr = format(date, 'yyyy-MM-dd')
-      const { slots } = await api.availability.get(barberId, dateStr, bookingData.services[0].id)
+      const { slots } = await api.availability.get(barberId, dateStr, bookingData.service.id)
       setTimeSlots(slots)
       setBookingData(prev => ({ ...prev, date: dateStr }))
     } catch {
-      setError('Erro ao carregar horários')
+      setError('Erro ao carregar horarios')
     } finally {
       setLoading(false)
     }
-  }, [bookingData.services])
+  }, [bookingData.service])
 
-  const selectBarber = (barber: Barber | null) => {
-    setBookingData(prev => ({ ...prev, barber }))
+  const selectService = (service: Service) => {
+    setBookingData(prev => ({ ...prev, service }))
     setStep(2)
   }
 
-  const toggleService = (service: Service) => {
-    setBookingData(prev => {
-      const exists = prev.services.some(s => s.id === service.id)
-      if (exists) {
-        return { ...prev, services: prev.services.filter(s => s.id !== service.id) }
-      } else {
-        return { ...prev, services: [...prev.services, service] }
-      }
-    })
-  }
-
-  const confirmServices = () => {
-    if (bookingData.services.length > 0) {
-      setStep(3)
-    }
+  const selectBarber = (barber: Barber | null) => {
+    setBookingData(prev => ({ ...prev, barber }))
+    setStep(3)
   }
 
   const selectDateTime = (date: string, time: string) => {
@@ -93,25 +85,27 @@ export function useBooking() {
     setStep(4)
   }
 
-  const setClientInfo = (name: string, whatsapp: string, notes: string) => {
+  const setClientInfo = (name: string, whatsapp: string, email: string, notes: string) => {
     setBookingData(prev => ({ 
       ...prev, 
       clientName: name, 
       clientWhatsapp: whatsapp,
+      clientEmail: email,
       notes 
     }))
-  }
-
-  const confirmClientInfo = () => {
     setStep(5)
   }
 
-  const setPaymentMethod = (method: 'pix' | 'local') => {
-    setBookingData(prev => ({ ...prev, paymentMethod: method }))
+  const setPaymentMethod = (method: PaymentMethod, type?: PaymentType) => {
+    setBookingData(prev => ({ 
+      ...prev, 
+      paymentMethod: method,
+      ...(type !== undefined && { paymentType: type })
+    }))
   }
 
-  const submitBooking = async (paymentMethod: 'pix' | 'card') => {
-    if (bookingData.services.length === 0 || !bookingData.date || !bookingData.time) {
+  const submitBooking = async () => {
+    if (!bookingData.service || !bookingData.date || !bookingData.time) {
       setError('Dados incompletos')
       return false
     }
@@ -121,17 +115,38 @@ export function useBooking() {
 
     try {
       const dateTime = `${bookingData.date}T${bookingData.time}:00`
+
+      let apiMethod: string = bookingData.paymentMethod
+      if (bookingData.paymentType === 'presencial') {
+        apiMethod = 'local'
+      } else if (bookingData.paymentMethod === 'nubank') {
+        apiMethod = 'pix'
+      }
+
       const result = await api.appointments.create({
-        serviceId: bookingData.services[0].id,
+        serviceId: bookingData.service.id,
         barberId: bookingData.barber?.id || 'any',
         dateTime,
         clientName: bookingData.clientName,
         clientWhatsapp: bookingData.clientWhatsapp,
+        clientEmail: bookingData.clientEmail,
         notes: bookingData.notes,
-        paymentMethod: paymentMethod === 'pix' ? 'pix' : 'local'
+        paymentMethod: apiMethod as PaymentMethod
       })
       setAppointmentResult(result)
-      setStep(6)
+
+      if (bookingData.paymentType === 'presencial') {
+        setStep(9)
+      } else if (bookingData.paymentMethod === 'pix') {
+        setStep(6)
+      } else if (bookingData.paymentMethod === 'nubank') {
+        setStep(7)
+      } else if (bookingData.paymentMethod === 'card') {
+        setStep(8)
+      } else {
+        setStep(9)
+      }
+
       return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar agendamento')
@@ -139,6 +154,10 @@ export function useBooking() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const goToConfirmation = () => {
+    setStep(9)
   }
 
   const goBack = () => {
@@ -150,14 +169,6 @@ export function useBooking() {
     setBookingData(initialBookingData)
     setAppointmentResult(null)
     setError(null)
-  }
-
-  const getTotalPrice = () => {
-    return bookingData.services.reduce((acc, s) => acc + s.price, 0)
-  }
-
-  const getTotalDuration = () => {
-    return bookingData.services.reduce((acc, s) => acc + s.duration_minutes, 0)
   }
 
   return {
@@ -172,17 +183,14 @@ export function useBooking() {
     loadServices,
     loadBarbers,
     loadAvailability,
-    toggleService,
-    confirmServices,
+    selectService,
     selectBarber,
     selectDateTime,
     setClientInfo,
-    confirmClientInfo,
     setPaymentMethod,
     submitBooking,
+    goToConfirmation,
     goBack,
-    reset,
-    getTotalPrice,
-    getTotalDuration
+    reset
   }
 }

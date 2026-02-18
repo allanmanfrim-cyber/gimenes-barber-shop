@@ -6,7 +6,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'gimenes-barber-shop-secret-key-202
 export interface AuthRequest extends Request {
   userId?: number
   userRole?: string
-  barberId?: number
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
@@ -19,16 +18,15 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const [, token] = authHeader.split(' ')
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; role: string; barberId?: number }
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; role: string }
     req.userId = decoded.id
     req.userRole = decoded.role
-    req.barberId = decoded.barberId
     next()
   } catch {
     return res.status(401).json({ message: 'Token invalido' })
   }
 }
 
-export function generateToken(userId: number, role: string, barberId?: number): string {
-  return jwt.sign({ id: userId, role, barberId }, JWT_SECRET, { expiresIn: '7d' })
+export function generateToken(userId: number, role: string): string {
+  return jwt.sign({ id: userId, role }, JWT_SECRET, { expiresIn: '7d' })
 }

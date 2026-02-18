@@ -9,8 +9,8 @@ export interface Service {
 export interface Barber {
   id: number
   name: string
-  phone?: string
-  photo_url?: string
+  whatsapp?: string
+  email?: string
   active: boolean
 }
 
@@ -18,6 +18,7 @@ export interface Client {
   id: number
   name: string
   whatsapp: string
+  email?: string
   created_at: string
 }
 
@@ -35,12 +36,18 @@ export interface Appointment {
   payment?: Payment
 }
 
+export type PaymentMethod = 'pix' | 'nubank' | 'card' | 'machine' | 'cash'
+export type PaymentType = 'online' | 'presencial'
+export type PaymentStatus = 'pending' | 'paid_pix' | 'paid_card' | 'paid_nubank' | 'pay_on_site' | 'cancelled'
+
 export interface Payment {
   id: number
   appointment_id: number
-  method: 'pix' | 'local'
+  method: PaymentMethod
   amount: number
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: PaymentStatus
+  external_reference?: string
+  paid_at?: string
 }
 
 export interface BusinessHours {
@@ -57,25 +64,45 @@ export interface TimeSlot {
 }
 
 export interface BookingData {
-  services: Service[]
+  service: Service | null
   barber: Barber | null
   date: string
   time: string
   clientName: string
   clientWhatsapp: string
+  clientEmail: string
   notes: string
-  paymentMethod: 'pix' | 'local'
+  paymentMethod: PaymentMethod
+  paymentType: PaymentType
 }
 
 export interface User {
   id: number
   username: string
-  role: 'admin' | 'barber'
-  barberId?: number
+  role: string
 }
 
 export interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+}
+
+export interface Notification {
+  id: number
+  appointment_id: number
+  type: 'whatsapp' | 'email'
+  recipient_type: 'client' | 'barber'
+  recipient_contact: string
+  status: 'pending' | 'sent' | 'failed'
+  sent_at?: string
+  error_message?: string
+  created_at: string
+}
+
+export interface NotificationStats {
+  total: number
+  sent: number
+  failed: number
+  pending: number
 }

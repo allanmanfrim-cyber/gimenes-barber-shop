@@ -37,6 +37,9 @@ export const api = {
 
   barbers: {
     list: () => fetchApi<{ barbers: import('../types').Barber[] }>('/barbers'),
+    listAll: () => fetchApi<{ barbers: import('../types').Barber[] }>('/admin/barbers'),
+    create: (data: { name: string; whatsapp?: string; email?: string }) =>
+      fetchApi<{ barber: import('../types').Barber }>('/admin/barbers', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: number, data: Partial<import('../types').Barber>) =>
       fetchApi(`/admin/barbers/${id}`, { method: 'PUT', body: JSON.stringify(data) })
   },
@@ -55,9 +58,15 @@ export const api = {
       dateTime: string
       clientName: string
       clientWhatsapp: string
+      clientEmail?: string
       notes?: string
-      paymentMethod: 'pix' | 'local'
-    }) => fetchApi<{ appointment: import('../types').Appointment; pixCode?: string }>(
+      paymentMethod: import('../types').PaymentMethod
+    }) => fetchApi<{ 
+      appointment: import('../types').Appointment
+      pixCode?: string
+      pixQrCodeBase64?: string
+      checkoutUrl?: string
+    }>(
       '/appointments',
       { method: 'POST', body: JSON.stringify(data) }
     ),
@@ -80,7 +89,17 @@ export const api = {
   payments: {
     list: () => fetchApi<{ payments: import('../types').Payment[] }>('/admin/payments'),
     update: (id: number, data: Partial<import('../types').Payment>) =>
-      fetchApi(`/admin/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+      fetchApi(`/admin/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    confirmSimulation: (externalReference: string, method: string) =>
+      fetchApi<{ success: boolean }>('/payments/confirm-simulation', {
+        method: 'POST',
+        body: JSON.stringify({ externalReference, method })
+      })
+  },
+
+  notifications: {
+    list: () => fetchApi<{ notifications: import('../types').Notification[]; stats: import('../types').NotificationStats }>('/admin/notifications'),
+    stats: () => fetchApi<{ stats: import('../types').NotificationStats }>('/admin/notifications/stats')
   },
 
   businessHours: {

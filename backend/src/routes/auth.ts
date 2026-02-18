@@ -21,15 +21,14 @@ router.post('/login', (req, res) => {
       return res.status(401).json({ message: 'Credenciais invalidas' })
     }
 
-    const token = generateToken(user.id, user.role, user.barber_id || undefined)
+    const token = generateToken(user.id, user.role)
 
     res.json({
       token,
       user: {
         id: user.id,
         username: user.username,
-        role: user.role,
-        barberId: user.barber_id
+        role: user.role
       }
     })
   } catch (error) {

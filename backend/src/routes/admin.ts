@@ -1,29 +1,23 @@
 import { Router } from 'express'
-import { authMiddleware, AuthRequest } from '../middleware/auth.js'
+import { authMiddleware } from '../middleware/auth.js'
 import { AppointmentModel } from '../models/Appointment.js'
 import { ServiceModel } from '../models/Service.js'
 import { BarberModel } from '../models/Barber.js'
-import { UserModel } from '../models/User.js'
 import { PaymentModel } from '../models/Payment.js'
 import { BusinessHoursModel } from '../models/BusinessHours.js'
-import { PaymentSettingsModel } from '../models/PaymentSettings.js'
-import bcrypt from 'bcryptjs'
-import { db } from '../database/init.js'
+import { NotificationModel } from '../models/Notification.js'
+import { notifyAppointmentCancelled, notifyAppointmentChanged, notifyAppointmentConfirmed } from '../services/notificationService.js'
 
 const router = Router()
 
 router.use(authMiddleware)
 
-router.get('/appointments', (req: AuthRequest, res) => {
+router.get('/appointments', (req, res) => {
   try {
-    const { date } = req.query
-    const barberId = req.userRole === 'admin' 
-      ? (req.query.barberId ? parseInt(req.query.barberId as string) : undefined)
-      : req.barberId
-
+    const { date, barberId } = req.query
     const appointments = AppointmentModel.findAll({
       date: date as string,
-      barberId
+      barberId: barberId ? parseInt(barberId as string) : undefined
     })
     res.json({ appointments })
   } catch (error) {
@@ -31,26 +25,48 @@ router.get('/appointments', (req: AuthRequest, res) => {
   }
 })
 
-router.put('/appointments/:id', (req, res) => {
+router.put('/appointments/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id)
+    const oldAppointment = AppointmentModel.findById(id)
+    
+    if (!oldAppointment) {
+      return res.status(404).json({ message: 'Agendamento nao encontrado' })
+    }
+
+    const oldDateTime = oldAppointment.date_time
     const appointment = AppointmentModel.update(id, req.body)
+    
     if (!appointment) {
       return res.status(404).json({ message: 'Agendamento nao encontrado' })
     }
+
+    if (req.body.date_time && req.body.date_time !== oldDateTime) {
+      await notifyAppointmentChanged(appointment, oldDateTime)
+    }
+
     res.json({ appointment })
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar agendamento' })
   }
 })
 
-router.delete('/appointments/:id', (req, res) => {
+router.delete('/appointments/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id)
+    const appointment = AppointmentModel.findById(id)
+    
+    if (!appointment) {
+      return res.status(404).json({ message: 'Agendamento nao encontrado' })
+    }
+
     const success = AppointmentModel.cancel(id)
     if (!success) {
       return res.status(404).json({ message: 'Agendamento nao encontrado' })
     }
+
+    await notifyAppointmentCancelled(appointment)
+
     res.json({ message: 'Agendamento cancelado com sucesso' })
   } catch (error) {
     res.status(500).json({ message: 'Erro ao cancelar agendamento' })
@@ -114,30 +130,16 @@ router.get('/barbers', (_req, res) => {
   }
 })
 
-router.post('/barbers', (req: AuthRequest, res) => {
-  if (req.userRole !== 'admin') {
-    return res.status(403).json({ message: 'Acesso negado' })
-  }
-
-  const transaction = db.transaction(() => {
-    const { name, username, password } = req.body
-    
-    if (!name || !username || !password) {
-      throw new Error('Dados incompletos')
-    }
-
-    const barber = BarberModel.create(name)
-    const passwordHash = bcrypt.hashSync(password, 10)
-    UserModel.create(username, passwordHash, 'barber', barber.id)
-    
-    return barber
-  })
-
+router.post('/barbers', (req, res) => {
   try {
-    const barber = transaction()
+    const { name, whatsapp, email } = req.body
+    if (!name) {
+      return res.status(400).json({ message: 'Nome e obrigatorio' })
+    }
+    const barber = BarberModel.create(name, whatsapp, email)
     res.status(201).json({ barber })
-  } catch (error: any) {
-    res.status(400).json({ message: error.message || 'Erro ao criar barbeiro' })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao criar barbeiro' })
   }
 })
 
@@ -154,23 +156,6 @@ router.put('/barbers/:id', (req, res) => {
   }
 })
 
-router.delete('/barbers/:id', (req: AuthRequest, res) => {
-  if (req.userRole !== 'admin') {
-    return res.status(403).json({ message: 'Acesso negado' })
-  }
-
-  try {
-    const id = parseInt(req.params.id)
-    const success = BarberModel.delete(id)
-    if (!success) {
-      return res.status(404).json({ message: 'Barbeiro nao encontrado' })
-    }
-    res.json({ message: 'Barbeiro removido com sucesso' })
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao remover barbeiro' })
-  }
-})
-
 router.get('/payments', (_req, res) => {
   try {
     const payments = PaymentModel.findAll()
@@ -180,16 +165,49 @@ router.get('/payments', (_req, res) => {
   }
 })
 
-router.put('/payments/:id', (req, res) => {
+router.put('/payments/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id)
+    const oldPayment = PaymentModel.findById(id)
+    
+    if (!oldPayment) {
+      return res.status(404).json({ message: 'Pagamento nao encontrado' })
+    }
+
     const payment = PaymentModel.update(id, req.body)
     if (!payment) {
       return res.status(404).json({ message: 'Pagamento nao encontrado' })
     }
+
+    if (req.body.status && req.body.status.startsWith('paid') && !oldPayment.status.startsWith('paid')) {
+      const appointment = AppointmentModel.findById(payment.appointment_id)
+      if (appointment) {
+        await notifyAppointmentConfirmed(appointment)
+      }
+    }
+
     res.json({ payment })
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar pagamento' })
+  }
+})
+
+router.get('/notifications', (_req, res) => {
+  try {
+    const notifications = NotificationModel.findAll()
+    const stats = NotificationModel.getStats()
+    res.json({ notifications, stats })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar notificacoes' })
+  }
+})
+
+router.get('/notifications/stats', (_req, res) => {
+  try {
+    const stats = NotificationModel.getStats()
+    res.json({ stats })
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar estatisticas' })
   }
 })
 
@@ -210,29 +228,6 @@ router.put('/business-hours', (req, res) => {
     res.json({ hours: updatedHours })
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar horarios' })
-  }
-})
-
-router.get('/payment-settings', (_req, res) => {
-  try {
-    const settings = PaymentSettingsModel.getAll()
-    res.json({ settings })
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar configuracoes de pagamento' })
-  }
-})
-
-router.put('/payment-settings', (req, res) => {
-  try {
-    const { settings } = req.body
-    if (!settings || typeof settings !== 'object') {
-      return res.status(400).json({ message: 'Dados invalidos' })
-    }
-    PaymentSettingsModel.setMultiple(settings)
-    const updatedSettings = PaymentSettingsModel.getAll()
-    res.json({ settings: updatedSettings })
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao atualizar configuracoes de pagamento' })
   }
 })
 

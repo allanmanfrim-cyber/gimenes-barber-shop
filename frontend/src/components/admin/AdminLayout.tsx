@@ -7,12 +7,12 @@ import {
   Scissors,
   Users,
   CreditCard,
-  Wallet,
+  Bell,
   Settings,
-  UserCircle,
   LogOut,
   Menu,
-  X
+  X,
+  ShieldAlert
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -27,8 +27,7 @@ const menuItems = [
   { path: '/admin/servicos', label: 'Servicos', icon: Scissors },
   { path: '/admin/barbeiros', label: 'Barbeiros', icon: Users },
   { path: '/admin/pagamentos', label: 'Pagamentos', icon: CreditCard },
-  { path: '/admin/perfil', label: 'Meu Perfil', icon: UserCircle },
-  { path: '/admin/config-pagamentos', label: 'Recebimentos', icon: Wallet },
+  { path: '/admin/notificacoes', label: 'Notificacoes', icon: Bell },
   { path: '/admin/configuracoes', label: 'Configuracoes', icon: Settings }
 ]
 
@@ -37,6 +36,8 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -51,12 +52,35 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   if (!isAuthenticated) return null
 
-  const filteredMenuItems = menuItems.filter(item => {
-    if (user?.role === 'barber') {
-      return ['Dashboard', 'Agendamentos', 'Meu Perfil'].includes(item.label)
-    }
-    return true
-  })
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
+        <div className="bg-dark-900 border border-dark-700 rounded-xl p-8 max-w-md text-center">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Acesso Restrito</h2>
+          <p className="text-dark-400 mb-6">
+            Esta area e exclusiva para barbeiros. Voce esta logado como cliente.
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/')}
+              className="w-full bg-primary-500 hover:bg-primary-600 text-dark-900 px-4 py-3 rounded-lg font-medium transition-colors"
+            >
+              Ir para Agendamento
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-dark-700 hover:bg-dark-600 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+            >
+              Fazer Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-dark-950 flex">
@@ -80,7 +104,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
               </div>
               <div>
                 <h1 className="text-white font-semibold text-sm">Gimenes</h1>
-                <p className="text-dark-400 text-xs capitalize">{user?.role}</p>
+                <p className="text-dark-400 text-xs">Admin</p>
               </div>
             </div>
             <button
@@ -93,7 +117,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         </div>
 
         <nav className="p-4 space-y-1">
-          {filteredMenuItems.map((item) => {
+          {menuItems.map((item) => {
             const isActive = location.pathname === item.path
             return (
               <Link
@@ -114,6 +138,10 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-dark-800">
+          <div className="flex items-center gap-2 px-3 py-2 mb-2 text-dark-400 text-sm">
+            <span>Logado como:</span>
+            <span className="text-primary-400 font-medium">{user?.username}</span>
+          </div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2 text-dark-300 hover:text-red-400 transition-colors w-full"

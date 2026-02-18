@@ -2,15 +2,16 @@ import { Router } from 'express'
 import { AppointmentModel } from '../models/Appointment.js'
 import { ClientModel } from '../models/Client.js'
 import { ServiceModel } from '../models/Service.js'
-import { PaymentModel } from '../models/Payment.js'
+import { PaymentModel, PaymentMethod } from '../models/Payment.js'
 import { findAvailableBarber } from '../utils/timeSlots.js'
-import { generatePixCode } from '../services/pixService.js'
+import { MercadoPagoService } from '../services/mercadoPagoService.js'
+import { notifyAppointmentConfirmed } from '../services/notificationService.js'
 
 const router = Router()
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { serviceId, barberId, dateTime, clientName, clientWhatsapp, notes, paymentMethod } = req.body
+    const { serviceId, barberId, dateTime, clientName, clientWhatsapp, clientEmail, notes, paymentMethod } = req.body
 
     if (!serviceId || !dateTime || !clientName || !clientWhatsapp || !paymentMethod) {
       return res.status(400).json({ message: 'Dados incompletos' })
@@ -39,7 +40,7 @@ router.post('/', (req, res) => {
       finalBarberId = barberId
     }
 
-    const client = ClientModel.findOrCreate(clientName, clientWhatsapp)
+    const client = ClientModel.findOrCreate(clientName, clientWhatsapp, clientEmail)
 
     const appointment = AppointmentModel.create({
       clientId: client.id,
@@ -50,22 +51,53 @@ router.post('/', (req, res) => {
     })
 
     let pixCode: string | undefined
-    if (paymentMethod === 'pix') {
-      pixCode = generatePixCode(service.price, appointment.id)
+    let pixQrCodeBase64: string | undefined
+    let checkoutUrl: string | undefined
+    let externalReference: string | undefined
+
+    const method = paymentMethod as PaymentMethod
+
+    const isPresencial = method === 'local' || method === 'machine' || method === 'cash'
+
+    if (method === 'pix' || method === 'nubank') {
+      const pixResult = await MercadoPagoService.createPixPayment(
+        service.price, 
+        appointment.id, 
+        clientEmail
+      )
+      pixCode = pixResult.qrCode
+      pixQrCodeBase64 = pixResult.qrCodeBase64
+      externalReference = pixResult.externalReference
+    } else if (method === 'card') {
+      const cardResult = await MercadoPagoService.createCardCheckout(
+        service.price,
+        appointment.id,
+        service.name,
+        clientEmail
+      )
+      checkoutUrl = cardResult.initPoint
+      externalReference = cardResult.externalReference
     }
 
     PaymentModel.create({
       appointmentId: appointment.id,
-      method: paymentMethod,
+      method,
       amount: service.price,
-      pixCode
+      pixCode,
+      externalReference
     })
 
     const fullAppointment = AppointmentModel.findById(appointment.id)
 
+    if (isPresencial && fullAppointment) {
+      await notifyAppointmentConfirmed(fullAppointment)
+    }
+
     res.status(201).json({
       appointment: fullAppointment,
-      pixCode
+      pixCode,
+      pixQrCodeBase64,
+      checkoutUrl
     })
   } catch (error) {
     console.error('Error creating appointment:', error)

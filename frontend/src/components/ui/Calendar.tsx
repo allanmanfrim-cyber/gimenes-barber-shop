@@ -26,22 +26,22 @@ export function Calendar({ selectedDate, onSelectDate, minDate = new Date() }: C
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 border border-gray-200">
+    <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 text-dark-500" />
+          <ChevronLeft className="w-5 h-5 text-dark-300" />
         </button>
-        <h3 className="font-semibold text-dark-900 capitalize">
+        <h3 className="font-semibold text-white capitalize">
           {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
         </h3>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
         >
-          <ChevronRight className="w-5 h-5 text-dark-500" />
+          <ChevronRight className="w-5 h-5 text-dark-300" />
         </button>
       </div>
 
@@ -70,11 +70,11 @@ export function Calendar({ selectedDate, onSelectDate, minDate = new Date() }: C
               disabled={disabled}
               className={`
                 aspect-square rounded-lg text-sm font-medium transition-all
-                ${!currentMonthDay ? 'text-gray-300' : ''}
-                ${disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
-                ${selected ? 'bg-green-700 text-white hover:bg-green-800' : ''}
-                ${today && !selected ? 'border border-green-700 text-green-700' : ''}
-                ${!disabled && !selected && !today ? 'text-dark-900' : ''}
+                ${!currentMonthDay ? 'text-dark-600' : ''}
+                ${disabled ? 'text-dark-600 cursor-not-allowed' : 'hover:bg-dark-700 cursor-pointer'}
+                ${selected ? 'bg-primary-500 text-dark-900 hover:bg-primary-600' : ''}
+                ${today && !selected ? 'border border-primary-500 text-primary-500' : ''}
+                ${!disabled && !selected && !today ? 'text-white' : ''}
               `}
             >
               {format(day, 'd')}

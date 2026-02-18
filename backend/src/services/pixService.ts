@@ -1,9 +1,7 @@
-import { PaymentSettingsModel } from '../models/PaymentSettings.js'
-
 export function generatePixCode(amount: number, appointmentId: number): string {
-  const pixKey = PaymentSettingsModel.get('pix_key') || 'gimenes@barbershop.com'
-  const merchantName = (PaymentSettingsModel.get('pix_name') || 'GIMENES BARBER SHOP').toUpperCase()
-  const city = (PaymentSettingsModel.get('pix_city') || 'JOSE BONIFACIO').toUpperCase()
+  const pixKey = 'gimenes@barbershop.com'
+  const merchantName = 'GIMENES BARBER SHOP'
+  const city = 'SAO PAULO'
   const txId = `AGEND${appointmentId.toString().padStart(8, '0')}`
   
   const payload = [

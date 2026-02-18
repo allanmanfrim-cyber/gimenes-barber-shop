@@ -1,32 +1,27 @@
 import { useState } from 'react'
-import { Calendar, User, Scissors, MapPin, Phone, ArrowRight } from 'lucide-react'
-import { Service, Barber } from '../../types'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { Input } from '../ui/Input'
+import { Button } from '../ui/Button'
 
 interface ClientFormProps {
   initialName: string
   initialWhatsapp: string
+  initialEmail: string
   initialNotes: string
-  bookingData: {
-    services: Service[]
-    barber: Barber | null
-    date: string
-    time: string
-  }
-  onSubmit: (name: string, whatsapp: string, notes: string) => void
+  onSubmit: (name: string, whatsapp: string, email: string, notes: string) => void
 }
 
 export function ClientForm({
   initialName,
   initialWhatsapp,
+  initialEmail,
   initialNotes,
-  bookingData,
   onSubmit
 }: ClientFormProps) {
   const [name, setName] = useState(initialName)
   const [whatsapp, setWhatsapp] = useState(initialWhatsapp)
-  const [errors, setErrors] = useState<{ name?: string; whatsapp?: string }>({})
+  const [email, setEmail] = useState(initialEmail)
+  const [notes, setNotes] = useState(initialNotes)
+  const [errors, setErrors] = useState<{ name?: string; whatsapp?: string; email?: string }>({})
 
   const formatWhatsapp = (value: string) => {
     const numbers = value.replace(/\D/g, '')
@@ -40,16 +35,26 @@ export function ClientForm({
     setWhatsapp(formatted)
   }
 
+  const validateEmail = (email: string) => {
+    if (!email) return true
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
   const validate = () => {
-    const newErrors: { name?: string; whatsapp?: string } = {}
+    const newErrors: { name?: string; whatsapp?: string; email?: string } = {}
     
     if (!name.trim()) {
-      newErrors.name = 'Nome é obrigatório'
+      newErrors.name = 'Nome e obrigatorio'
     }
     
     const whatsappNumbers = whatsapp.replace(/\D/g, '')
     if (!whatsappNumbers || whatsappNumbers.length < 10) {
-      newErrors.whatsapp = 'WhatsApp inválido'
+      newErrors.whatsapp = 'WhatsApp invalido'
+    }
+
+    if (email && !validateEmail(email)) {
+      newErrors.email = 'E-mail invalido'
     }
 
     setErrors(newErrors)
@@ -59,120 +64,53 @@ export function ClientForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
-      onSubmit(name, whatsapp, initialNotes)
+      onSubmit(name, whatsapp, email, notes)
     }
   }
 
-  const totalPrice = bookingData.services.reduce((acc, s) => acc + s.price, 0)
-  const servicesNames = bookingData.services.map(s => s.name).join(', ')
-
-  const formattedDateTime = bookingData.date && bookingData.time
-    ? format(new Date(bookingData.date + 'T' + bookingData.time), "d 'de' MMMM 'às' HH:mm", { locale: ptBR })
-    : ''
-
   return (
-    <div className="px-4 py-6">
-      <h2 className="text-2xl font-bold text-dark-900 mb-2">Confirme seu agendamento</h2>
-      <p className="text-dark-400 mb-6">Revise os detalhes e preencha seus dados de contato</p>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Input
+        label="Seu nome"
+        placeholder="Digite seu nome completo"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        error={errors.name}
+      />
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-        <h3 className="text-lg font-bold text-dark-900 mb-4">Resumo do agendamento</h3>
-        
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-dark-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-dark-400">Data e horário</p>
-              <p className="text-dark-900 font-medium">{formattedDateTime}</p>
-            </div>
-          </div>
+      <Input
+        label="WhatsApp"
+        placeholder="(00) 00000-0000"
+        value={whatsapp}
+        onChange={handleWhatsappChange}
+        error={errors.whatsapp}
+      />
 
-          <div className="flex items-start gap-3">
-            <User className="w-5 h-5 text-dark-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-dark-400">Barbeiro</p>
-              <p className="text-dark-900 font-medium">{bookingData.barber?.name || 'Qualquer barbeiro'}</p>
-            </div>
-          </div>
+      <Input
+        label="E-mail (opcional)"
+        type="email"
+        placeholder="seu@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
+      />
 
-          <div className="flex items-start gap-3">
-            <Scissors className="w-5 h-5 text-dark-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-dark-400">Serviços</p>
-              <p className="text-dark-900 font-medium">{servicesNames || '-'}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-            <span className="font-semibold text-dark-900">Total</span>
-            <span className="font-bold text-dark-900">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
-          </div>
-
-          <div className="flex items-start gap-3 pt-2 border-t border-gray-100">
-            <MapPin className="w-5 h-5 text-dark-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-dark-400">Endereço</p>
-              <p className="text-dark-900">Rua Ademar de Barros, 278 - Centro - José Bonifácio/SP</p>
-            </div>
-          </div>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-dark-200 mb-2">
+          Observacoes (opcional)
+        </label>
+        <textarea
+          className="w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-3 text-white placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all resize-none"
+          placeholder="Alguma observacao especial?"
+          rows={3}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-semibold text-dark-900 mb-2">
-            Nome completo
-          </label>
-          <input
-            type="text"
-            placeholder="Digite seu nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={`w-full bg-white border rounded-xl px-4 py-3.5 text-dark-900 placeholder-dark-400 focus:outline-none focus:ring-2 transition-all ${
-              errors.name 
-                ? 'border-red-500 focus:ring-red-200' 
-                : 'border-gray-200 focus:border-green-700 focus:ring-green-100'
-            }`}
-          />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-dark-900 mb-2">
-            WhatsApp
-          </label>
-          <div className="relative">
-            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
-            <input
-              type="tel"
-              placeholder="(11) 98765-4321"
-              value={whatsapp}
-              onChange={handleWhatsappChange}
-              className={`w-full bg-white border rounded-xl pl-12 pr-4 py-3.5 text-dark-900 placeholder-dark-400 focus:outline-none focus:ring-2 transition-all ${
-                errors.whatsapp 
-                  ? 'border-red-500 focus:ring-red-200' 
-                  : 'border-gray-200 focus:border-green-700 focus:ring-green-100'
-              }`}
-            />
-          </div>
-          <p className="text-sm text-primary-600 mt-1">Enviaremos a confirmação via WhatsApp</p>
-          {errors.whatsapp && (
-            <p className="text-red-500 text-sm mt-1">{errors.whatsapp}</p>
-          )}
-        </div>
-
-        <div className="pt-4">
-          <button
-            type="submit"
-            className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all bg-dark-900 text-white hover:bg-dark-800"
-          >
-            Continuar
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      </form>
-    </div>
+      <Button type="submit" fullWidth>
+        Continuar
+      </Button>
+    </form>
   )
 }

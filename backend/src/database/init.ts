@@ -1,15 +1,10 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import fs from 'fs'
+import bcrypt from 'bcryptjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const dataDir = path.join(__dirname, '../../data')
-const dbPath = path.join(dataDir, 'barbershop.db')
-
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true })
-}
+const dbPath = path.join(__dirname, '../../data/barbershop.db')
 
 export const db = new Database(dbPath)
 
@@ -27,8 +22,8 @@ export function initDatabase() {
     CREATE TABLE IF NOT EXISTS barbers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      phone TEXT,
-      photo_url TEXT,
+      whatsapp TEXT,
+      email TEXT,
       active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -37,6 +32,7 @@ export function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       whatsapp TEXT NOT NULL,
+      email TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -61,6 +57,21 @@ export function initDatabase() {
       amount REAL NOT NULL,
       status TEXT DEFAULT 'pending',
       pix_code TEXT,
+      external_reference TEXT,
+      paid_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (appointment_id) REFERENCES appointments(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      appointment_id INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      recipient_type TEXT NOT NULL,
+      recipient_contact TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      sent_at DATETIME,
+      error_message TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (appointment_id) REFERENCES appointments(id)
     );
@@ -70,9 +81,7 @@ export function initDatabase() {
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
       role TEXT DEFAULT 'admin',
-      barber_id INTEGER,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (barber_id) REFERENCES barbers(id)
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS business_hours (
@@ -83,17 +92,48 @@ export function initDatabase() {
       is_open INTEGER DEFAULT 1
     );
 
-    CREATE TABLE IF NOT EXISTS payment_settings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      setting_key TEXT NOT NULL UNIQUE,
-      setting_value TEXT,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
     CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date_time);
     CREATE INDEX IF NOT EXISTS idx_appointments_barber ON appointments(barber_id);
     CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+    CREATE INDEX IF NOT EXISTS idx_notifications_appointment ON notifications(appointment_id);
+    CREATE INDEX IF NOT EXISTS idx_payments_external ON payments(external_reference);
   `)
 
+  runMigrations()
+  seedTestUsers()
+
   console.log('Database initialized successfully')
+}
+
+function runMigrations() {
+  const migrations = [
+    { name: 'add_barber_contacts', sql: 'ALTER TABLE barbers ADD COLUMN whatsapp TEXT' },
+    { name: 'add_barber_email', sql: 'ALTER TABLE barbers ADD COLUMN email TEXT' },
+    { name: 'add_client_email', sql: 'ALTER TABLE clients ADD COLUMN email TEXT' },
+    { name: 'add_payment_external_ref', sql: 'ALTER TABLE payments ADD COLUMN external_reference TEXT' },
+    { name: 'add_payment_paid_at', sql: 'ALTER TABLE payments ADD COLUMN paid_at DATETIME' },
+  ]
+
+  for (const migration of migrations) {
+    try {
+      db.exec(migration.sql)
+    } catch {
+    }
+  }
+}
+
+function seedTestUsers() {
+  const testUsers = [
+    { username: 'allan_barbeiro', password: 'senha123', role: 'admin' },
+    { username: 'cliente_teste', password: 'senha123', role: 'client' }
+  ]
+
+  for (const user of testUsers) {
+    const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(user.username)
+    if (!existing) {
+      const passwordHash = bcrypt.hashSync(user.password, 10)
+      db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)').run(user.username, passwordHash, user.role)
+      console.log(`Usuario de teste criado: ${user.username} (${user.role})`)
+    }
+  }
 }

@@ -1,50 +1,30 @@
 import { ReactNode } from 'react'
-import { ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 interface LayoutProps {
   children: ReactNode
   showHeader?: boolean
   title?: string
-  showBackButton?: boolean
-  onBack?: () => void
 }
 
-export function Layout({ children, showHeader = true, showBackButton = false, onBack }: LayoutProps) {
-  const navigate = useNavigate()
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack()
-    } else {
-      navigate(-1)
-    }
-  }
-
+export function Layout({ children, showHeader = true, title }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-dark-950">
       {showHeader && (
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <header className="bg-dark-900 border-b border-dark-800">
           <div className="max-w-lg mx-auto px-4 py-4">
-            <div className="flex items-center">
-              {showBackButton && (
-                <button
-                  onClick={handleBack}
-                  className="flex items-center gap-1 text-dark-600 hover:text-dark-900 transition-colors mr-4"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span className="text-sm">Voltar</span>
-                </button>
-              )}
-              <div className="flex-1 flex justify-center">
-                <img src="/images/logo.png" alt="Gimenes Barber Shop" className="h-12" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center">
+                <span className="text-dark-900 font-bold text-lg">G</span>
               </div>
-              {showBackButton && <div className="w-16" />}
+              <div>
+                <h1 className="text-white font-semibold">Gimenes Barber Shop</h1>
+                {title && <p className="text-dark-400 text-sm">{title}</p>}
+              </div>
             </div>
           </div>
         </header>
       )}
-      <main className="max-w-lg mx-auto">
+      <main className="max-w-lg mx-auto px-4 py-6">
         {children}
       </main>
     </div>
