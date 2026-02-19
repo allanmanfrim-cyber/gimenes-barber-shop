@@ -15,25 +15,24 @@ interface ConfirmationProps {
 
 function getPaymentStatusText(status: PaymentStatus): string {
   switch (status) {
-    case 'paid_pix': return 'Pago via Pix'
-    case 'paid_card': return 'Pago via Cartão'
-    case 'pay_on_site': return 'Pagar no local'
+    case 'approved': return 'Pagamento Aprovado'
+    case 'rejected': return 'Pagamento Rejeitado'
+    case 'expired': return 'Pagamento Expirado'
     case 'pending': return 'Aguardando pagamento'
-    case 'cancelled': return 'Cancelado'
+    case 'cancelado': return 'Cancelado'
     default: return status
   }
 }
 
 function getPaymentStatusColor(status: PaymentStatus): string {
   switch (status) {
-    case 'paid_pix':
-    case 'paid_card':
+    case 'approved':
       return 'bg-green-500 text-black'
-    case 'pay_on_site':
+    case 'expired':
       return 'bg-primary-500 text-black'
     case 'pending':
       return 'bg-amber-500 text-black'
-    case 'cancelled':
+    case 'cancelado':
       return 'bg-red-500 text-white'
     default:
       return 'bg-neutral-800 text-neutral-400'
@@ -72,7 +71,7 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
     : ''
 
   const paymentStatus = appointment.payment?.status || 'pending'
-  const isPayOnSite = paymentStatus === 'pay_on_site'
+  
 
   return (
     <div className="text-center space-y-8 animate-in fade-in zoom-in-95 duration-700 pb-10">
@@ -205,3 +204,13 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+

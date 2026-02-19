@@ -1,4 +1,4 @@
-interface LoadingProps {
+﻿interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'
   text?: string
 }
@@ -35,3 +35,6 @@ export function Loading({ size = 'md', text }: LoadingProps) {
     </div>
   )
 }
+
+
+

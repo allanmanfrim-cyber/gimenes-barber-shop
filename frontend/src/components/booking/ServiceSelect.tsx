@@ -1,7 +1,7 @@
 ﻿import { Service } from '../../types'
 import { Card } from '../ui/Card'
 import { Loading } from '../ui/Loading'
-import { Clock, Star, ChevronRight } from 'lucide-react'
+import { Clock, Star } from 'lucide-react'
 
 interface ServiceSelectProps {
   services: Service[]
@@ -75,3 +75,7 @@ export function ServiceSelect({ services, loading, onSelect }: ServiceSelectProp
     </div>
   )
 }
+
+
+
+

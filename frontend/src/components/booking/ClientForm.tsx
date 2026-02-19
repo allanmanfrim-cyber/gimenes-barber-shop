@@ -1,7 +1,7 @@
-﻿import { useState } from 'react'
+﻿import { useState, ChangeEvent } from 'react'
 import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
-import { Phone, Calendar as CalendarIcon, ArrowRight, User, Mail, MessageCircle, Star } from 'lucide-react'
+import { Calendar as CalendarIcon, ArrowRight, User, Mail, MessageCircle, Star } from 'lucide-react'
 
 interface ClientFormProps {
   initialName: string
@@ -34,7 +34,7 @@ export function ClientForm({
     return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`
   }
 
-  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWhatsappChange = (e: ChangeEvent<HTMLInputElement>) => {
     const formatted = formatWhatsapp(e.target.value)
     setWhatsapp(formatted)
   }
@@ -156,3 +156,8 @@ export function ClientForm({
     </form>
   )
 }
+
+
+
+
+

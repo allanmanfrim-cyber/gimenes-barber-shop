@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { Barber } from '../../types'
 import { api } from '../../services/api'
@@ -227,3 +227,6 @@ export default function AdminBarbers() {
     </AdminLayout>
   )
 }
+
+
+

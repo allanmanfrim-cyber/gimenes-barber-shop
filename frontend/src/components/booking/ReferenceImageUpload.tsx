@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { X, Upload } from 'lucide-react'
 
 interface ReferenceImageUploadProps {
@@ -15,7 +15,7 @@ export function ReferenceImageUpload({ onImagesSelected, onNext, onBack }: Refer
     if (!files) return
 
     if (images.length + files.length > 3) {
-      alert('Você pode enviar no máximo 3 fotos.')
+      alert('VocÃª pode enviar no mÃ¡ximo 3 fotos.')
       return
     }
 
@@ -46,16 +46,16 @@ export function ReferenceImageUpload({ onImagesSelected, onNext, onBack }: Refer
   return (
     <div className="px-4 py-6 space-y-8 max-w-md mx-auto">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-dark-900 mb-2">Fotos de Referência</h2>
+        <h2 className="text-2xl font-bold text-dark-900 mb-2">Fotos de ReferÃªncia</h2>
         <p className="text-dark-500">
-          Envie até 3 fotos do corte que você deseja para ajudar seu barbeiro.
+          Envie atÃ© 3 fotos do corte que vocÃª deseja para ajudar seu barbeiro.
         </p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         {images.map((img, index) => (
           <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200">
-            <img src={img} alt={`Referência ${index + 1}`} className="w-full h-full object-cover" />
+            <img src={img} alt={`ReferÃªncia ${index + 1}`} className="w-full h-full object-cover" />
             <button
               onClick={() => removeImage(index)}
               className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
@@ -96,3 +96,6 @@ export function ReferenceImageUpload({ onImagesSelected, onNext, onBack }: Refer
     </div>
   )
 }
+
+
+

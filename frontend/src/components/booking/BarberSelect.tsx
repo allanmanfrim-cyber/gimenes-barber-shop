@@ -92,3 +92,6 @@ export function BarberSelect({ barbers, loading, onSelect }: BarberSelectProps) 
     </div>
   )
 }
+
+
+

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import { Copy, Check, Clock, ArrowLeft } from 'lucide-react'
 import QRCode from 'qrcode'
 
@@ -171,3 +171,6 @@ export function PixPayment({
     </div>
   )
 }
+
+
+

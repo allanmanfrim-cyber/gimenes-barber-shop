@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect } from "react"
+﻿import { useState, useEffect } from "react"
 import { useTheme } from "../../context/ThemeContext"
 import { Button } from "../../components/ui/Button"
 import { Input } from "../../components/ui/Input"
-import { Palette, Image as ImageIcon, Phone, MapPin, Clock, Globe, Star, Eye, ShieldCheck } from "lucide-react"
+import { Palette, Phone, Star, Eye, ShieldCheck } from "lucide-react"
 import { AdminLayout } from "../../components/admin/AdminLayout"
 
 export default function LayoutSettings() {
@@ -180,3 +180,7 @@ export default function LayoutSettings() {
     </AdminLayout>
   )
 }
+
+
+
+

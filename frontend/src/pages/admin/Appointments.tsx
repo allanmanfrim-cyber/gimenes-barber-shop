@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 import { Appointment, Barber } from '../../types'
@@ -12,7 +12,7 @@ export default function AdminAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [barbers, setBarbers] = useState<Barber[]>([])
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [selectedBarberId, setSelectedBarberId] = useState<number | null>(null)
+  const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
 
@@ -68,10 +68,10 @@ export default function AdminAppointments() {
   }
 
   const handleNoShow = async (id: number, clientId: number) => {
-    if (!confirm('Registrar falta para este cliente? Isso aumentará o contador de faltas e aplicará a regra de multa.')) return
+    if (!confirm('Registrar falta para este cliente? Isso aumentarÃ¡ o contador de faltas e aplicarÃ¡ a regra de multa.')) return
     try {
       await api.admin.registerNoShow(clientId)
-      await handleStatusChange(id, 'cancelled')
+      await handleStatusChange(id, 'cancelado')
       alert('Falta registrada e agendamento cancelado.')
     } catch (error) {
       console.error('Error registering no-show:', error)
@@ -164,14 +164,14 @@ export default function AdminAppointments() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        appointment.status === 'confirmed' ? 'bg-blue-500/20 text-blue-400' :
-                        appointment.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                        appointment.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                        appointment.status === 'confirmado' ? 'bg-blue-500/20 text-blue-400' :
+                        appointment.status === 'concluido' ? 'bg-green-500/20 text-green-400' :
+                        appointment.status === 'cancelado' ? 'bg-red-500/20 text-red-400' :
                         'bg-dark-600 text-dark-300'
                       }`}>
-                        {appointment.status === 'confirmed' ? 'Confirmado' :
-                         appointment.status === 'completed' ? 'Finalizado' :
-                         appointment.status === 'cancelled' ? 'Cancelado' :
+                        {appointment.status === 'confirmado' ? 'Confirmado' :
+                         appointment.status === 'concluido' ? 'Finalizado' :
+                         appointment.status === 'cancelado' ? 'Cancelado' :
                          appointment.status}
                       </span>
                     </div>
@@ -241,12 +241,12 @@ export default function AdminAppointments() {
               )}
             </div>
 
-            {selectedAppointment.status !== 'cancelled' && (
+            {selectedAppointment.status !== 'cancelado' && (
               <div className="flex gap-2 pt-4 border-t border-dark-700">
-                {selectedAppointment.status === 'confirmed' && (
+                {selectedAppointment.status === 'confirmado' && (
                   <Button
                     fullWidth
-                    onClick={() => handleStatusChange(selectedAppointment.id, 'completed')}
+                    onClick={() => handleStatusChange(selectedAppointment.id, 'concluido')}
                   >
                     <Check className="w-4 h-4" />
                     Finalizar
@@ -276,3 +276,11 @@ export default function AdminAppointments() {
     </AdminLayout>
   )
 }
+
+
+
+
+
+
+
+

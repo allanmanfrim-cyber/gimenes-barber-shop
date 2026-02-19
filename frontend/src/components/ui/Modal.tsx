@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react'
+﻿import { ReactNode, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 interface ModalProps {
@@ -52,3 +52,6 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     </div>
   )
 }
+
+
+

@@ -1,3 +1,75 @@
+﻿export type PaymentMethod =
+  | "pix"
+  | "credit_card"
+  | "nubank"
+  | "cash"
+  | "machine"
+
+export type PaymentStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "expired"
+  | "cancelado"
+
+export type AppointmentStatus =
+  | "pendente_pagamento"
+  | "confirmado"
+  | "cancelado"
+  | "no_show"
+  | "concluido"
+
+export interface Barber {
+  id: string
+  name: string
+  photo_url?: string
+  whatsapp?: string
+  email?: string
+  instagram?: string
+  active: boolean
+  display_order?: number
+}
+
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: "admin" | "barber"
+  barberId?: string
+  tenant_id?: number
+}
+
+export interface Notification {
+  id: string
+  title: string
+  message: string
+  read: boolean
+  created_at: string
+}
+
+export interface NotificationStats {
+  total: number
+  unread: number
+}
+
+export interface Payment {
+  id: string
+  appointment_id: string
+  method: PaymentMethod
+  status: PaymentStatus
+  amount: number
+  created_at: string
+  qr_code?: string
+  qr_code_base64?: string
+  expiration_time?: string
+}
+
+export interface PaymentWithDetails extends Payment {
+  client_name: string
+  service_name: string
+  date_time: string
+}
+
 export interface Service {
   id: number
   tenant_id: number
@@ -5,14 +77,6 @@ export interface Service {
   duration_minutes: number
   price: number
   active: boolean
-}
-
-export interface Barber {
-  id: number
-  tenant_id: number
-  name: string
-  active: boolean
-  display_order: number
 }
 
 export interface Client {
@@ -23,7 +87,7 @@ export interface Client {
   email?: string
   data_nascimento?: string
   faltas_sem_aviso?: number
-  status_multa?: boolean
+  status_multa?: string
   created_at: string
 }
 
@@ -34,7 +98,7 @@ export interface Appointment {
   barber_id: number
   service_id: number
   date_time: string
-  status: 'pendente_pagamento' | 'confirmado' | 'cancelado' | 'no_show' | 'concluido'
+  status: AppointmentStatus
   notes?: string
   reference_images?: string | null
   client?: Client
@@ -43,34 +107,11 @@ export interface Appointment {
   payment?: Payment
 }
 
-export interface Payment {
-  id: number
-  tenant_id: number
-  appointment_id: number
-  metodo_visual: 'pix' | 'nubank' | 'cartao' | 'dinheiro_local' | 'cartao_local' | 'pix_local'
-  amount: number
-  status: 'pending' | 'approved' | 'rejected' | 'expired' | 'cancelled'
-  qr_code?: string
-  qr_code_base64?: string
-  expiration_time?: string
-}
-
-export interface BusinessHours {
-  id: number
-  tenant_id: number
-  day_of_week: number
-  open_time: string
-  close_time: string
-  is_open: boolean
-}
-
 export interface TimeSlot {
   time: string
   available: boolean
 }
 
-// Atualizado para refletir o estado do useBooking
-export type PaymentMethod = 'pix' | 'nubank' | 'card' | 'local'
 export type PaymentType = 'online' | 'presencial'
 
 export interface BookingData {
@@ -88,15 +129,13 @@ export interface BookingData {
   paymentType: PaymentType
 }
 
-export interface User {
-  id: number
-  username: string
-  role: string
-  tenant_id: number
-}
-
 export interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
 }
+
+
+
+
+

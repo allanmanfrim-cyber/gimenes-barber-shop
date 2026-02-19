@@ -2,10 +2,10 @@
 import { Barber, TimeSlot as TimeSlotType } from '../../types'
 import { Calendar } from '../ui/Calendar'
 import { TimeSlot } from '../ui/TimeSlot'
-import { Loading } from '../ui/Loading'
+
 import { Button } from '../ui/Button'
 import { format } from 'date-fns'
-import { CalendarDays, Clock, Star } from 'lucide-react'
+import { CalendarDays, Clock } from 'lucide-react'
 
 interface DateTimeSelectProps {
   selectedBarber: Barber | null
@@ -13,7 +13,7 @@ interface DateTimeSelectProps {
   selectedTime: string
   timeSlots: TimeSlotType[]
   loading: boolean
-  onLoadAvailability: (barberId: number | 'any', date: Date) => void
+  onLoadAvailability: (barberId: string | 'any', date: Date) => void
   onSelectDateTime: (date: string, time: string) => void
 }
 
@@ -110,3 +110,8 @@ export function DateTimeSelect({
     </div>
   )
 }
+
+
+
+
+

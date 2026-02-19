@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { PaymentStatus, PaymentMethod } from '../../types'
+import { PaymentStatus, PaymentMethod, PaymentWithDetails } from '../../types'
 import { QrCode, CreditCard, Wallet, CheckCircle, XCircle } from 'lucide-react'
 
 interface PaymentWithDetails {
@@ -41,7 +41,7 @@ export default function AdminPayments() {
 
   const handleConfirmPayment = async (payment: PaymentWithDetails) => {
     try {
-      const status = payment.method === 'pix' ? 'paid_pix' : 'paid_card'
+      const status = payment.method === 'pix' ? 'approved' : 'approved'
       await api.payments.update(payment.id, { status } as any)
       loadPayments()
     } catch (error) {
@@ -51,7 +51,7 @@ export default function AdminPayments() {
 
   const handleMarkPaidOnSite = async (payment: PaymentWithDetails) => {
     try {
-      await api.payments.update(payment.id, { status: 'paid_pix', paid_at: new Date().toISOString() } as any)
+      await api.payments.update(payment.id, { status: 'approved', paid_at: new Date().toISOString() } as any)
       loadPayments()
     } catch (error) {
       console.error('Error updating payment:', error)
@@ -60,7 +60,7 @@ export default function AdminPayments() {
 
   const handleCancelPayment = async (payment: PaymentWithDetails) => {
     try {
-      await api.payments.update(payment.id, { status: 'cancelled' } as any)
+      await api.payments.update(payment.id, { status: 'cancelado' } as any)
       loadPayments()
     } catch (error) {
       console.error('Error cancelling payment:', error)
@@ -69,23 +69,23 @@ export default function AdminPayments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid_pix':
-      case 'paid_card': return 'bg-green-500/20 text-green-400'
-      case 'pay_on_site': return 'bg-blue-500/20 text-blue-400'
+      case 'approved':
+      case 'approved': return 'bg-green-500/20 text-green-400'
+      case 'pending': return 'bg-blue-500/20 text-blue-400'
       case 'pending': return 'bg-yellow-500/20 text-yellow-400'
-      case 'cancelled': return 'bg-red-500/20 text-red-400'
+      case 'cancelado': return 'bg-red-500/20 text-red-400'
       default: return 'bg-dark-600 text-dark-400'
     }
   }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'paid_pix': return 'Pago via Pix'
-      case 'paid_card': return 'Pago via Cartao'
+      case 'approved': return 'Pago via Pix'
+      case 'approved': return 'Pago via Cartao'
       case 'paid_nubank': return 'Pago via Nubank'
-      case 'pay_on_site': return 'Pagar no local'
+      case 'pending': return 'Pagar no local'
       case 'pending': return 'Aguardando'
-      case 'cancelled': return 'Cancelado'
+      case 'cancelado': return 'Cancelado'
       default: return status
     }
   }
@@ -94,10 +94,10 @@ export default function AdminPayments() {
     switch (method) {
       case 'pix': return <QrCode className="w-4 h-4 text-[#32BCAD]" />
       case 'nubank': return <span className="text-[#820AD1] font-black text-xs">Nu</span>
-      case 'card': return <CreditCard className="w-4 h-4 text-blue-400" />
+      case 'credit_card': return <CreditCard className="w-4 h-4 text-blue-400" />
       case 'machine': return <CreditCard className="w-4 h-4 text-dark-400" />
       case 'cash': return <Wallet className="w-4 h-4 text-green-400" />
-      case 'local': return <Wallet className="w-4 h-4 text-dark-400" />
+      case 'cash': return <Wallet className="w-4 h-4 text-dark-400" />
       default: return null
     }
   }
@@ -106,10 +106,10 @@ export default function AdminPayments() {
     switch (method) {
       case 'pix': return 'Pix'
       case 'nubank': return 'Nubank'
-      case 'card': return 'Cartao'
+      case 'credit_card': return 'Cartao'
       case 'machine': return 'Maquina'
       case 'cash': return 'Dinheiro'
-      case 'local': return 'No local'
+      case 'cash': return 'No local'
       default: return method
     }
   }
@@ -120,11 +120,11 @@ export default function AdminPayments() {
 
   const statusFilters: { label: string; value: 'all' | PaymentStatus }[] = [
     { label: 'Todos', value: 'all' },
-    { label: 'Pago Pix', value: 'paid_pix' },
-    { label: 'Pago Cartao', value: 'paid_card' },
-    { label: 'No Local', value: 'pay_on_site' },
+    { label: 'Pago Pix', value: 'approved' },
+    { label: 'Pago Cartao', value: 'approved' },
+    { label: 'No Local', value: 'pending' },
     { label: 'Aguardando', value: 'pending' },
-    { label: 'Cancelado', value: 'cancelled' }
+    { label: 'Cancelado', value: 'cancelado' }
   ]
 
   return (
@@ -198,7 +198,7 @@ export default function AdminPayments() {
                               Confirmar
                             </button>
                           )}
-                          {payment.status === 'pay_on_site' && (
+                          {payment.status === 'pending' && (
                             <button
                               onClick={() => handleMarkPaidOnSite(payment)}
                               className="flex items-center gap-1 text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded hover:bg-green-500/30 transition-colors"
@@ -207,7 +207,7 @@ export default function AdminPayments() {
                               Recebido
                             </button>
                           )}
-                          {(payment.status === 'pending' || payment.status === 'pay_on_site') && (
+                          {(payment.status === 'pending' || payment.status === 'pending') && (
                             <button
                               onClick={() => handleCancelPayment(payment)}
                               className="flex items-center gap-1 text-xs px-3 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
@@ -229,3 +229,13 @@ export default function AdminPayments() {
     </AdminLayout>
   )
 }
+
+
+
+
+
+
+
+
+
+

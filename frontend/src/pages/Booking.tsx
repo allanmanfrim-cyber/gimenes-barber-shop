@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+﻿import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { useBooking } from '../hooks/useBooking'
@@ -164,3 +164,8 @@ export default function Booking() {
     </Layout>
   )
 }
+
+
+
+
+

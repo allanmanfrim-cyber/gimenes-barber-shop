@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 import { MessageCircle } from 'lucide-react'
@@ -26,7 +26,7 @@ export default function AdminCustomerRecovery() {
   }, [days])
 
   const sendWhatsApp = (client: any) => {
-    const message = `Oi ${client.name.split(' ')[0]}, sentimos sua falta! 💈\nQue tal agendar um horário para renovar o visual? ✂️\nhttps://www.gimenesbarber.com.br`
+    const message = `Oi ${client.name.split(' ')[0]}, sentimos sua falta! ðŸ’ˆ\nQue tal agendar um horÃ¡rio para renovar o visual? âœ‚ï¸\nhttps://www.gimenesbarber.com.br`
     const phone = client.whatsapp.replace(/\D/g, '')
     const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`
     window.open(url, '_blank')
@@ -38,7 +38,7 @@ export default function AdminCustomerRecovery() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-white">Clientes Inativos</h2>
-            <p className="text-dark-400">Listagem de clientes que não agendam há algum tempo</p>
+            <p className="text-dark-400">Listagem de clientes que nÃ£o agendam hÃ¡ algum tempo</p>
           </div>
 
           <div className="flex bg-dark-900 rounded-lg p-1 border border-dark-700">
@@ -70,8 +70,8 @@ export default function AdminCustomerRecovery() {
                   <tr>
                     <th className="px-6 py-4 text-left font-semibold">Cliente</th>
                     <th className="px-6 py-4 text-left font-semibold">WhatsApp</th>
-                    <th className="px-6 py-4 text-left font-semibold">Último Agendamento</th>
-                    <th className="px-6 py-4 text-right font-semibold">Ação</th>
+                    <th className="px-6 py-4 text-left font-semibold">Ãšltimo Agendamento</th>
+                    <th className="px-6 py-4 text-right font-semibold">AÃ§Ã£o</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-800">
@@ -101,7 +101,7 @@ export default function AdminCustomerRecovery() {
                   ) : (
                     <tr>
                       <td colSpan={4} className="px-6 py-12 text-center text-dark-500">
-                        Nenhum cliente encontrado para este período.
+                        Nenhum cliente encontrado para este perÃ­odo.
                       </td>
                     </tr>
                   )}
@@ -114,3 +114,6 @@ export default function AdminCustomerRecovery() {
     </AdminLayout>
   )
 }
+
+
+

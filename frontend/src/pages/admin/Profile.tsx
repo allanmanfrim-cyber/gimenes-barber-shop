@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/ui/Button'
@@ -24,10 +24,10 @@ export default function AdminProfile() {
     }
   }, [user])
 
-  const loadProfile = async (barberId: number) => {
+  const loadProfile = async (barberId: string) => {
     try {
       const data = await api.barbers.listAll()
-      const myBarber = data.barbers.find((b: any) => b.id === barberId)
+      const myBarber = data.barbers.find((b: any) => String(b.id) === String(barberId))
       if (myBarber) {
         setProfile({
           name: myBarber.name,
@@ -45,7 +45,7 @@ export default function AdminProfile() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !user.barberId) {
-      alert('Erro: ID do barbeiro não encontrado')
+      alert('Erro: ID do barbeiro nÃ£o encontrado')
       return
     }
     
@@ -90,11 +90,11 @@ export default function AdminProfile() {
           ) : (
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-dark-300 text-sm mb-2">Nome Público</label>
+                <label className="block text-dark-300 text-sm mb-2">Nome PÃºblico</label>
                 <Input 
                   value={profile.name}
                   onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Como o cliente verá seu nome"
+                  placeholder="Como o cliente verÃ¡ seu nome"
                 />
               </div>
               <div>
@@ -121,7 +121,7 @@ export default function AdminProfile() {
 
               <div className="pt-6">
                 <Button type="submit" fullWidth loading={saving}>
-                  Salvar Alterações
+                  Salvar AlteraÃ§Ãµes
                 </Button>
               </div>
             </form>
@@ -131,3 +131,7 @@ export default function AdminProfile() {
     </AdminLayout>
   )
 }
+
+
+
+

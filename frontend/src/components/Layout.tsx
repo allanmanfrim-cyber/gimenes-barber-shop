@@ -12,7 +12,7 @@ interface LayoutProps {
 
 export function Layout({ children, showHeader = true, title, onBack }: LayoutProps) {
   const { config } = useTheme();
-  const navigate = useNavigate();
+  
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary-500/30">
@@ -46,3 +46,7 @@ export function Layout({ children, showHeader = true, title, onBack }: LayoutPro
     </div>
   )
 }
+
+
+
+

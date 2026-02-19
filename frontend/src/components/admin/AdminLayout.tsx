@@ -11,7 +11,7 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
+  User,
   ShieldAlert,
   RefreshCcw,
   Gift,
@@ -148,7 +148,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
                </div>
                <div className="flex flex-col">
                   <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest leading-none mb-1">Operador</span>
-                  <span className="text-xs text-white font-black uppercase tracking-tight">{user?.username}</span>
+                  <span className="text-xs text-white font-black uppercase tracking-tight">{user?.name}</span>
                </div>
             </div>
             <button
@@ -194,3 +194,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     </div>
   )
 }
+
+
+
+

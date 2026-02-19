@@ -4,7 +4,7 @@ import { api } from '../../services/api'
 import { Appointment } from '../../types'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Calendar, Users, DollarSign, Clock, TrendingUp, Scissors, ChevronRight, Star } from 'lucide-react'
+import { Calendar, Clock, TrendingUp, Scissors, ChevronRight, Star } from 'lucide-react'
 
 export default function AdminDashboard() {
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([])
@@ -18,7 +18,7 @@ export default function AdminDashboard() {
     try {
       const today = format(new Date(), 'yyyy-MM-dd')
       const { appointments } = await api.appointments.list(today)
-      setTodayAppointments(appointments.filter(a => a.status !== 'cancelled'))
+      setTodayAppointments(appointments.filter(a => a.status !== 'cancelado'))
     } catch (error) {
       console.error('Error loading dashboard:', error)
     } finally {
@@ -27,8 +27,8 @@ export default function AdminDashboard() {
   }
 
   const totalRevenue = todayAppointments.reduce((sum, a) => sum + (a.service?.price || 0), 0)
-  const confirmedCount = todayAppointments.filter(a => a.status === 'confirmed').length
-  const completedCount = todayAppointments.filter(a => a.status === 'completed').length
+  const confirmedCount = todayAppointments.filter(a => a.status === 'confirmado').length
+  const completedCount = todayAppointments.filter(a => a.status === 'concluido').length
 
   return (
     <AdminLayout title="Dashboard">
@@ -128,12 +128,12 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-8">
                     <div className="flex flex-col items-end">
                        <span className={`px-3 py-1 rounded-sm text-[9px] font-black uppercase tracking-widest mb-2 ${
-                        appointment.status === 'confirmed' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20' :
-                        appointment.status === 'completed' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
+                        appointment.status === 'confirmado' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20' :
+                        appointment.status === 'concluido' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
                         'bg-neutral-900 text-neutral-500 border border-white/[0.05]'
                       }`}>
-                        {appointment.status === 'confirmed' ? 'Confirmado' :
-                         appointment.status === 'completed' ? 'Finalizado' :
+                        {appointment.status === 'confirmado' ? 'Confirmado' :
+                         appointment.status === 'concluido' ? 'Finalizado' :
                          appointment.status}
                       </span>
                       <span className="text-xl font-black text-white tracking-tighter">
@@ -190,3 +190,11 @@ function StatCard({
     </div>
   )
 }
+
+
+
+
+
+
+
+

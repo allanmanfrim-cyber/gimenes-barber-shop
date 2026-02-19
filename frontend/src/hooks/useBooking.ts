@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+﻿import { useState, useCallback } from 'react'
 import { BookingData, Service, Barber, TimeSlot, PaymentMethod, PaymentType } from '../types'
 import { api } from '../services/api'
 import { format } from 'date-fns'
@@ -39,7 +39,7 @@ export function useBooking() {
       const { services } = await api.services.list()
       setServices(services.filter(s => s.active))
     } catch {
-      setError('Erro ao carregar serviços')
+      setError('Erro ao carregar serviÃ§os')
     } finally {
       setLoading(false)
     }
@@ -57,7 +57,7 @@ export function useBooking() {
     }
   }, [])
 
-  const loadAvailability = useCallback(async (barberId: number | 'any', date: Date) => {
+  const loadAvailability = useCallback(async (barberId: string | 'any', date: Date) => {
     if (!bookingData.service) return
     setLoading(true)
     try {
@@ -66,7 +66,7 @@ export function useBooking() {
       setTimeSlots(slots)
       setBookingData(prev => ({ ...prev, date: dateStr }))
     } catch {
-      setError('Erro ao carregar horários')
+      setError('Erro ao carregar horÃ¡rios')
     } finally {
       setLoading(false)
     }
@@ -103,11 +103,11 @@ export function useBooking() {
   }
 
   const confirmClientInfo = () => {
-    // Verificar se o serviço selecionado requer fotos de referência
+    // Verificar se o serviÃ§o selecionado requer fotos de referÃªncia
     const serviceName = bookingData.service?.name.toLowerCase() || ''
     const requiresPhotos = serviceName.includes('corte') || 
                            serviceName.includes('combo') ||
-                           serviceName.includes('hidratação')
+                           serviceName.includes('hidrataÃ§Ã£o')
     
     if (requiresPhotos) {
       setStep(4.5)
@@ -142,7 +142,7 @@ export function useBooking() {
 
       let apiMethod: string = bookingData.paymentMethod
       if (bookingData.paymentType === 'presencial') {
-        apiMethod = 'local'
+        apiMethod = 'cash'
       } else if (bookingData.paymentMethod === 'nubank') {
         apiMethod = 'pix'
       }
@@ -167,7 +167,7 @@ export function useBooking() {
         setStep(6)
       } else if (bookingData.paymentMethod === 'nubank') {
         setStep(7)
-      } else if (bookingData.paymentMethod === 'card') {
+      } else if (bookingData.paymentMethod === 'credit_card') {
         setStep(8)
       } else {
         setStep(9)
@@ -235,3 +235,9 @@ export function useBooking() {
     reset
   }
 }
+
+
+
+
+
+

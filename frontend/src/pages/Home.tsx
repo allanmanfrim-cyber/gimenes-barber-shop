@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { Scissors, Clock, MapPin, Instagram, Phone, Star, ShieldCheck, Sparkles, ChevronRight } from 'lucide-react'
+import { Clock, MapPin, Instagram, Phone, Star, ShieldCheck, Sparkles, ChevronRight } from 'lucide-react'
 import { api } from '../services/api'
 import { Service, Barber } from '../types'
 
@@ -278,3 +278,7 @@ export default function Home() {
     </div>
   )
 }
+
+
+
+

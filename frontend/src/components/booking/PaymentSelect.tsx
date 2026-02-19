@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react'
 import { BookingData, PaymentMethod, PaymentType } from '../../types'
 import { Button } from '../ui/Button'
-import { Clock, User, Scissors, Check, CreditCard, Banknote, Star, ShieldCheck, Wallet } from 'lucide-react'
+import { Clock, Check, CreditCard, Banknote, Star, ShieldCheck, Wallet } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -145,23 +145,23 @@ export function PaymentSelect({
             </button>
 
             <button
-              onClick={() => handleMethodSelect('card')}
+              onClick={() => handleMethodSelect('credit_card')}
               className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all border duration-300 ${
-                selectedMethod === 'card'
+                selectedMethod === 'credit_card'
                   ? 'bg-neutral-900 border-primary-500/50'
                   : 'bg-black border-white/[0.03] hover:border-white/10'
               }`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${selectedMethod === 'card' ? 'bg-primary-500/20' : 'bg-neutral-900'}`}>
-                  <CreditCard className={`w-6 h-6 transition-colors ${selectedMethod === 'card' ? 'text-primary-500' : 'text-neutral-700'}`} />
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${selectedMethod === 'credit_card' ? 'bg-primary-500/20' : 'bg-neutral-900'}`}>
+                  <CreditCard className={`w-6 h-6 transition-colors ${selectedMethod === 'credit_card' ? 'text-primary-500' : 'text-neutral-700'}`} />
                 </div>
                 <div className="text-left">
-                  <p className={`font-black uppercase text-xs tracking-tight ${selectedMethod === 'card' ? 'text-primary-500' : 'text-white'}`}>Novo Cartão</p>
+                  <p className={`font-black uppercase text-xs tracking-tight ${selectedMethod === 'credit_card' ? 'text-primary-500' : 'text-white'}`}>Novo Cartão</p>
                   <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Crédito ou Débito</p>
                 </div>
               </div>
-              {selectedMethod === 'card' && <Check className="w-5 h-5 text-primary-500" />}
+              {selectedMethod === 'credit_card' && <Check className="w-5 h-5 text-primary-500" />}
             </button>
           </>
         ) : (
@@ -227,3 +227,9 @@ export function PaymentSelect({
     </div>
   )
 }
+
+
+
+
+
+

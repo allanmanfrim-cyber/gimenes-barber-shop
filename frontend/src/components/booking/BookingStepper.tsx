@@ -1,4 +1,4 @@
-interface BookingStepperProps {
+﻿interface BookingStepperProps {
   currentStep: number
   totalSteps: number
 }
@@ -28,3 +28,6 @@ export function BookingStepper({ currentStep, totalSteps }: BookingStepperProps)
     </div>
   )
 }
+
+
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 import { Gift, MessageCircle } from 'lucide-react'
@@ -26,7 +26,7 @@ export default function AdminBirthdays() {
   }, [date])
 
   const sendWhatsApp = (client: any) => {
-    const message = `Feliz aniversário, ${client.name.split(' ')[0]}! 🎉\nQue tal aproveitar seu dia para renovar o visual? 💈\nAgende aqui: https://www.gimenesbarber.com.br`
+    const message = `Feliz aniversÃ¡rio, ${client.name.split(' ')[0]}! ðŸŽ‰\nQue tal aproveitar seu dia para renovar o visual? ðŸ’ˆ\nAgende aqui: https://www.gimenesbarber.com.br`
     const phone = client.whatsapp.replace(/\D/g, '')
     const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`
     window.open(url, '_blank')
@@ -39,9 +39,9 @@ export default function AdminBirthdays() {
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-3">
               <Gift className="w-6 h-6 text-pink-500" />
-              Felicitações do Dia
+              FelicitaÃ§Ãµes do Dia
             </h2>
-            <p className="text-dark-400">Clientes que fazem aniversário nesta data</p>
+            <p className="text-dark-400">Clientes que fazem aniversÃ¡rio nesta data</p>
           </div>
 
           <div className="bg-dark-900 rounded-lg p-1 border border-dark-700">
@@ -67,7 +67,7 @@ export default function AdminBirthdays() {
                     <th className="px-6 py-4 text-left font-semibold">Cliente</th>
                     <th className="px-6 py-4 text-left font-semibold">WhatsApp</th>
                     <th className="px-6 py-4 text-left font-semibold">Data de Nascimento</th>
-                    <th className="px-6 py-4 text-right font-semibold">Ação</th>
+                    <th className="px-6 py-4 text-right font-semibold">AÃ§Ã£o</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-800">
@@ -110,3 +110,6 @@ export default function AdminBirthdays() {
     </AdminLayout>
   )
 }
+
+
+

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import { Clock, ArrowLeft } from 'lucide-react'
 import { Button } from '../ui/Button'
 
@@ -135,3 +135,6 @@ export function NubankPayment({
     </div>
   )
 }
+
+
+

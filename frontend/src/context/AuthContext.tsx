@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+﻿import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { AuthState } from '../types'
 
 interface AuthContextType extends AuthState {
@@ -77,3 +77,6 @@ export function useAuth() {
   }
   return context
 }
+
+
+
