@@ -2,7 +2,6 @@
 import AdminLayoutSettings from './pages/admin/LayoutSettings'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-import { TestSwitcher } from './components/TestSwitcher'
 import Home from './pages/Home'
 import Booking from './pages/Booking'
 import AdminLogin from './pages/admin/Login'
@@ -20,27 +19,26 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/agendar" element={<Booking />} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/agendamentos" element={<AdminAppointments />} />
-          <Route path="/admin/servicos" element={<AdminServices />} />
-          <Route path="/admin/barbeiros" element={<AdminBarbers />} />
-          <Route path="/admin/recuperar-clientes" element={<AdminCustomerRecovery />} />
-          <Route path="/admin/aniversariantes" element={<AdminBirthdays />} />
-          <Route path="/admin/pagamentos" element={<AdminPayments />} />
-          <Route path="/admin/notificacoes" element={<AdminNotifications />} />
-          <Route path="/admin/configuracoes" element={<AdminSettings />} />`n          <Route path="/admin/layout" element={<AdminLayoutSettings />} />
-        </Routes>
-        
-      </BrowserRouter>
-          </ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/agendar" element={<Booking />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/agendamentos" element={<AdminAppointments />} />
+            <Route path="/admin/servicos" element={<AdminServices />} />
+            <Route path="/admin/barbeiros" element={<AdminBarbers />} />
+            <Route path="/admin/recuperar-clientes" element={<AdminCustomerRecovery />} />
+            <Route path="/admin/aniversariantes" element={<AdminBirthdays />} />
+            <Route path="/admin/pagamentos" element={<AdminPayments />} />
+            <Route path="/admin/notificacoes" element={<AdminNotifications />} />
+            <Route path="/admin/configuracoes" element={<AdminSettings />} />
+            <Route path="/admin/layout" element={<AdminLayoutSettings />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthProvider>
   )
 }
 
 export default App
-
