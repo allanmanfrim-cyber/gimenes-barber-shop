@@ -37,7 +37,6 @@ export default function Booking() {
     setReferenceImages,
     setPaymentMethod,
     submitBooking,
-    goToPayment,
     goToConfirmation,
     goBack,
     reset
@@ -163,7 +162,10 @@ export default function Booking() {
       {step === 4.5 && (
         <ReferenceImageUpload
           onImagesSelected={setReferenceImages}
-          onNext={goToPayment}
+          onNext={() => {
+            // Ir para o passo 5 (Pagamento)
+            setPaymentMethod('pix', 'online')
+          }}
           onBack={handleBack}
         />
       )}
@@ -212,6 +214,8 @@ export default function Booking() {
       {step === 9 && appointmentResult && (
         <Confirmation
           appointment={appointmentResult.appointment}
+          pixCode={appointmentResult.pixCode}
+          pixQrCodeBase64={appointmentResult.pixQrCodeBase64}
           onFinish={handleFinish}
         />
       )}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Appointment } from '../../types'
+import { Appointment, PaymentStatus } from '../../types'
 import { Button } from '../ui/Button'
-import { CheckCircle, Copy, Check, Bell, Mail, MessageSquare, Instagram, MapPin, Star } from 'lucide-react'
+import { CheckCircle, Copy, Check, Bell, Mail, MessageSquare } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import QRCode from 'qrcode'
@@ -13,13 +13,32 @@ interface ConfirmationProps {
   onFinish: () => void
 }
 
-const SOCIAL_LINKS = [
-  { name: 'Gimenes Barber (Oficial)', url: 'https://www.instagram.com/gimenesbarberjr/' },
-  { name: 'Juninho Gimenes', url: 'https://www.instagram.com/_juniorgimenes_/' },
-  { name: 'Abner', url: 'https://www.instagram.com/barbeiroabner_ofc/' }
-]
+function getPaymentStatusText(status: PaymentStatus): string {
+  switch (status) {
+    case 'paid_pix': return 'Pago via Pix'
+    case 'paid_card': return 'Pago via Cartao'
+    case 'pay_on_site': return 'Pagar no local'
+    case 'pending': return 'Aguardando pagamento'
+    case 'cancelled': return 'Cancelado'
+    default: return status
+  }
+}
 
-const GOOGLE_MAPS_LINK = "https://www.google.com/search?q=gimenesbarber+jos%C3%A9+bonif%C3%A1cio&oq=gimenesbarber+jos%C3%A9+bonif%C3%A1cio&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIJCAEQIRgKGKABMgkIAhAhGAoYoAHSAQkxMDE1OWowajeoAgCwAgA&sourceid=chrome&ie=UTF-8#lrd=0x94bdbff4a98cb991:0xe3bae23a182f1c6f,1"
+function getPaymentStatusColor(status: PaymentStatus): string {
+  switch (status) {
+    case 'paid_pix':
+    case 'paid_card':
+      return 'bg-green-500/20 text-green-400'
+    case 'pay_on_site':
+      return 'bg-blue-500/20 text-blue-400'
+    case 'pending':
+      return 'bg-yellow-500/20 text-yellow-400'
+    case 'cancelled':
+      return 'bg-red-500/20 text-red-400'
+    default:
+      return 'bg-dark-600 text-dark-400'
+  }
+}
 
 export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }: ConfirmationProps) {
   const [copied, setCopied] = useState(false)
@@ -52,8 +71,11 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
     ? format(parseISO(appointment.date_time), "dd 'de' MMMM 'as' HH:mm", { locale: ptBR })
     : ''
 
+  const paymentStatus = appointment.payment?.status || 'pending'
+  const isPayOnSite = paymentStatus === 'pay_on_site'
+
   return (
-    <div className="text-center space-y-6 max-w-md mx-auto">
+    <div className="text-center space-y-6">
       <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
         <CheckCircle className="w-10 h-10 text-green-500" />
       </div>
@@ -64,9 +86,6 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
         </h2>
         <p className="text-dark-400">
           Seu horario foi reservado com sucesso
-        </p>
-        <p className="text-sm text-dark-500 mt-1">
-          Rua Ademar de Barros, 278 - Centro - Jose Bonifacio/SP
         </p>
       </div>
 
@@ -88,6 +107,12 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
             <span className="text-dark-400">Valor</span>
             <span className="text-primary-500 font-semibold">
               R$ {appointment.service?.price.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-dark-400">Pagamento</span>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(paymentStatus)}`}>
+              {getPaymentStatusText(paymentStatus)}
             </span>
           </div>
         </div>
@@ -124,55 +149,12 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </Button>
           </div>
+
+          <p className="text-xs text-dark-500 mt-3">
+            Apos o pagamento, voce recebera a confirmacao automaticamente
+          </p>
         </div>
       )}
-
-      {/* Siga nossas redes sociais */}
-      <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 text-left space-y-4">
-        <div>
-          <h3 className="text-white font-bold flex items-center gap-2">
-            <Instagram className="w-4 h-4 text-pink-500" />
-            Siga nossas redes sociais
-          </h3>
-          <p className="text-xs text-dark-400">Fique por dentro das novidades, cortes e promocoes 🔥</p>
-        </div>
-        <div className="grid gap-2">
-          {SOCIAL_LINKS.map(social => (
-            <a 
-              key={social.url}
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors group"
-            >
-              <span className="text-sm text-dark-200">{social.name}</span>
-              <Instagram className="w-4 h-4 text-dark-400 group-hover:text-pink-500 transition-colors" />
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* Como chegar & Avaliar */}
-      <div className="grid grid-cols-2 gap-3">
-        <a 
-          href={GOOGLE_MAPS_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-col items-center gap-2 p-4 rounded-xl bg-dark-800 border border-dark-700 hover:border-primary-500/50 transition-colors"
-        >
-          <MapPin className="w-6 h-6 text-primary-500" />
-          <span className="text-xs text-white font-medium">Como chegar</span>
-        </a>
-        <a 
-          href={GOOGLE_MAPS_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-col items-center gap-2 p-4 rounded-xl bg-dark-800 border border-dark-700 hover:border-primary-500/50 transition-colors"
-        >
-          <Star className="w-6 h-6 text-yellow-500" />
-          <span className="text-xs text-white font-medium">Avaliar no Google</span>
-        </a>
-      </div>
 
       <div className="bg-dark-800/50 border border-dark-700 rounded-xl p-4">
         <div className="flex items-center gap-2 text-dark-300 mb-2">
@@ -189,15 +171,17 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
             <span>E-mail</span>
           </div>
         </div>
+        <p className="text-xs text-dark-500 mt-2">
+          {isPayOnSite 
+            ? 'Voce recebera lembretes antes do seu horario'
+            : 'Voce recebera a confirmacao apos o pagamento ser processado'
+          }
+        </p>
       </div>
 
       <Button fullWidth onClick={onFinish}>
         Voltar ao Inicio
       </Button>
-
-      <p className="text-[10px] text-dark-500 text-center uppercase tracking-widest">
-        Observacao: Em caso de nao comparecimento sem aviso previo, podera ser aplicada uma taxa referente ao horario reservado.
-      </p>
     </div>
   )
 }

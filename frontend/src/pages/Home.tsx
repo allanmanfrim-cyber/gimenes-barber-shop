@@ -1,152 +1,277 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { Scissors, Clock, MapPin, Instagram, Phone } from 'lucide-react'
+import { Scissors, Clock, MapPin, Instagram, Phone, Star, ShieldCheck, Sparkles } from 'lucide-react'
 import { api } from '../services/api'
-import { Service } from '../types'
+import { Service, Barber } from '../types'
 
 export default function Home() {
   const [services, setServices] = useState<Service[]>([])
+  const [barbers, setBarbers] = useState<Barber[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function loadServices() {
+    async function loadData() {
       try {
-        const data = await api.services.list()
-        setServices(data.services)
+        const [servicesData, barbersData] = await Promise.all([
+          api.services.list(),
+          api.barbers.list()
+        ])
+        setServices(servicesData.services)
+        setBarbers(barbersData.barbers)
       } catch (error) {
-        console.error('Error loading services:', error)
+        console.error('Error loading data:', error)
       } finally {
         setLoading(false)
       }
     }
-    loadServices()
+    loadData()
   }, [])
 
   return (
-    <div className="min-h-screen bg-dark-950 flex flex-col">
+    <div className="min-h-screen bg-dark-950 flex flex-col font-sans">
+      {/* Header / Nav */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-dark-950/80 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-dark-800 rounded-xl overflow-hidden p-1 border border-white/10">
+              <img src="/images/logo.png" alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="text-white font-bold tracking-tight text-lg">Gimenes Barber</span>
+          </div>
+          
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#servicos" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">Serviços</a>
+            <a href="#barbeiros" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">Barbeiros</a>
+            <a href="#unidades" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">Unidades</a>
+          </nav>
+
+          <Link to="/agendar">
+            <Button size="sm" className="hidden md:flex rounded-full px-6">Agendar Agora</Button>
+          </Link>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-20 bg-[#121212]">
-        <div className="w-24 h-24 bg-primary-500 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-primary-500/20">
-          <Scissors className="w-12 h-12 text-dark-900" />
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
+        {/* Background Gradients */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-500/10 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] -z-10" />
+        
+        <div className="w-32 h-32 bg-primary-500 rounded-[2.5rem] flex items-center justify-center mb-10 shadow-2xl shadow-primary-500/20 transform rotate-3">
+          <Scissors className="w-14 h-14 text-dark-900 -rotate-3" />
         </div>
         
-        <h1 className="text-5xl font-bold text-white text-center mb-4 tracking-tight">
-          Gimenes Barber Shop
+        <h1 className="text-6xl md:text-8xl font-black text-white text-center mb-6 tracking-tighter leading-[0.9]">
+          ESTILO &<br />
+          <span className="text-primary-500">PRECISÃO.</span>
         </h1>
         
-        <p className="text-dark-400 text-center mb-10 text-lg max-w-xs">
-          Estilo e precisão em cada corte. Onde a tradição encontra o moderno.
+        <p className="text-dark-400 text-center mb-12 text-lg md:text-xl max-w-lg leading-relaxed font-medium">
+          Onde a tradição da barbearia clássica encontra o acabamento moderno de alto nível.
         </p>
 
-        <Link to="/agendar" className="w-full max-w-sm">
-          <Button fullWidth size="lg" className="py-6 text-lg rounded-2xl shadow-xl shadow-primary-500/10">
-            Agendar Horário
-          </Button>
-        </Link>
-      </div>
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-sm md:max-w-none justify-center">
+          <Link to="/agendar" className="w-full md:w-auto">
+            <Button fullWidth size="lg" className="h-16 px-12 text-lg rounded-full shadow-2xl shadow-primary-500/20 group">
+              Agendar Horário
+              <Star className="w-5 h-5 ml-2 fill-dark-900 group-hover:scale-125 transition-transform" />
+            </Button>
+          </Link>
+        </div>
+      </section>
 
-      {/* Vantagens Minimalistas */}
-      <section className="py-12 border-y border-dark-800 bg-dark-950">
-        <div className="max-w-4xl mx-auto px-4 flex flex-wrap justify-center gap-8 md:gap-16">
-          <div className="flex items-center gap-3 text-dark-300">
-            <Clock className="w-5 h-5 text-primary-500" />
-            <span className="text-sm font-medium uppercase tracking-widest">Agilidade</span>
-          </div>
-          <div className="flex items-center gap-3 text-dark-300">
-            <Scissors className="w-5 h-5 text-primary-500" />
-            <span className="text-sm font-medium uppercase tracking-widest">Qualidade</span>
-          </div>
-          <div className="flex items-center gap-3 text-dark-300">
-            <Instagram className="w-5 h-5 text-primary-500" />
-            <span className="text-sm font-medium uppercase tracking-widest">Estilo</span>
+      {/* Vantagens Section */}
+      <section className="py-20 bg-dark-900/50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-8 bg-dark-800/50 border border-white/5 rounded-[2rem] flex flex-col items-center text-center">
+              <div className="w-14 h-14 bg-primary-500/10 rounded-2xl flex items-center justify-center mb-6">
+                <ShieldCheck className="w-7 h-7 text-primary-500" />
+              </div>
+              <h3 className="text-white font-bold text-xl mb-3">Qualidade Premium</h3>
+              <p className="text-dark-400 text-sm leading-relaxed">Equipamentos de última geração e produtos de marcas renomadas mundialmente.</p>
+            </div>
+            
+            <div className="p-8 bg-dark-800/50 border border-white/5 rounded-[2rem] flex flex-col items-center text-center">
+              <div className="w-14 h-14 bg-primary-500/10 rounded-2xl flex items-center justify-center mb-6">
+                <Sparkles className="w-7 h-7 text-primary-500" />
+              </div>
+              <h3 className="text-white font-bold text-xl mb-3">Ambiente Exclusivo</h3>
+              <p className="text-dark-400 text-sm leading-relaxed">Conforto absoluto com ar-condicionado, café gourmet e trilha sonora selecionada.</p>
+            </div>
+
+            <div className="p-8 bg-dark-800/50 border border-white/5 rounded-[2rem] flex flex-col items-center text-center">
+              <div className="w-14 h-14 bg-primary-500/10 rounded-2xl flex items-center justify-center mb-6">
+                <Clock className="w-7 h-7 text-primary-500" />
+              </div>
+              <h3 className="text-white font-bold text-xl mb-3">Horário Pontual</h3>
+              <p className="text-dark-400 text-sm leading-relaxed">Respeito total ao seu tempo com sistema de agendamento preciso e sem atrasos.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Serviços */}
-      <section className="bg-dark-900 py-20 px-4">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-xs uppercase tracking-[0.3em] font-bold text-primary-500 text-center mb-12">
-            Nossos Serviços
-          </h2>
+      {/* Serviços Section */}
+      <section id="servicos" className="bg-dark-950 py-32 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-xs uppercase tracking-[0.4em] font-bold text-primary-500 mb-4">
+              Nossos Serviços
+            </h2>
+            <p className="text-4xl font-bold text-white tracking-tight">O que fazemos de melhor.</p>
+          </div>
           
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
             {loading ? (
               <div className="flex justify-center py-10">
-                <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
               </div>
-            ) : services.length > 0 ? (
+            ) : (
               services.map((service) => (
                 <div 
                   key={service.id} 
-                  className="group flex justify-between items-center p-4 rounded-2xl hover:bg-dark-800 transition-colors border border-transparent hover:border-dark-700"
+                  className="group flex justify-between items-center p-6 bg-dark-900 border border-white/5 rounded-3xl hover:border-primary-500/30 transition-all"
                 >
                   <div className="flex flex-col">
                     <div className="flex items-center gap-3">
-                      <h3 className="text-base font-bold text-white">{service.name}</h3>
-                      {(service.name.toLowerCase().includes('combo') || service.name === 'Corte + Barba') && (
-                        <span className="text-[10px] bg-primary-500 text-dark-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                          Indicado
+                      <h3 className="text-xl font-bold text-white">{service.name}</h3>
+                      {service.name.toLowerCase().includes('combo') && (
+                        <span className="text-[10px] bg-primary-500 text-dark-900 px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                          Recomendado
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-dark-400 mt-1">{service.duration_minutes} minutos</p>
+                    <p className="text-dark-400 mt-1 text-sm">{service.duration_minutes} min • Corte com tesoura e máquina</p>
                   </div>
-                  <span className="text-base font-bold text-primary-500 ml-4">
-                    R$ {Number(service.price).toFixed(2).replace('.', ',')}
-                  </span>
+                  <div className="text-right">
+                    <p className="text-2xl font-black text-primary-500">
+                      R$ {Number(service.price).toFixed(2).replace('.', ',')}
+                    </p>
+                  </div>
                 </div>
               ))
-            ) : (
-              <p className="text-dark-500 text-center py-10 italic">Nenhum serviço disponível no momento.</p>
             )}
           </div>
         </div>
       </section>
 
-      {/* Footer Minimalista */}
-      <footer className="bg-dark-950 py-16 px-4 border-t border-dark-800">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-dark-300">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-10 h-10 bg-dark-900 rounded-full flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary-500" />
+      {/* Barbeiros Section */}
+      <section id="barbeiros" className="bg-dark-900/50 py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-xs uppercase tracking-[0.4em] font-bold text-primary-500 mb-4">
+              Profissionais
+            </h2>
+            <p className="text-4xl font-bold text-white tracking-tight">Especialistas em Estilo.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            {barbers.map((barber) => (
+              <div key={barber.id} className="group relative">
+                <div className="aspect-[4/5] overflow-hidden rounded-[3rem] border border-white/10 bg-dark-800">
+                  <img 
+                    src={barber.name.toLowerCase().includes('junior') ? '/images/junior.png' : '/images/abner.jpg'} 
+                    alt={barber.name} 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-transparent to-transparent opacity-80" />
+                  <div className="absolute bottom-10 left-10 right-10">
+                    <p className="text-primary-500 font-bold uppercase tracking-widest text-xs mb-2">Barbeiro Especialista</p>
+                    <h3 className="text-white text-3xl font-bold mb-4">{barber.name}</h3>
+                    <div className="flex gap-4">
+                      <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center hover:bg-primary-500 transition-colors cursor-pointer">
+                        <Instagram className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center hover:bg-green-500 transition-colors cursor-pointer">
+                        <Phone className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs leading-relaxed uppercase tracking-widest">
-                R. Ademar de Barros, 278<br />
-                Centro - José Bonifácio/SP
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer / Contato */}
+      <footer id="unidades" className="bg-dark-950 py-24 px-6 border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-dark-800 rounded-xl overflow-hidden p-1 border border-white/10">
+                  <img src="/images/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <span className="text-white font-bold tracking-tight text-xl">Gimenes Barber Shop</span>
+              </div>
+              <p className="text-dark-400 leading-relaxed text-sm">
+                A melhor experiência em barbearia da região de José Bonifácio. Tradição, estilo e o melhor atendimento para você.
               </p>
             </div>
-            
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-10 h-10 bg-dark-900 rounded-full flex items-center justify-center">
-                <Clock className="w-5 h-5 text-primary-500" />
+
+            <div className="space-y-8">
+              <h4 className="text-white font-bold text-lg uppercase tracking-widest">Contatos</h4>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 group">
+                  <div className="w-12 h-12 bg-dark-900 rounded-2xl flex items-center justify-center border border-white/5 group-hover:border-primary-500 transition-colors">
+                    <MapPin className="w-5 h-5 text-primary-500" />
+                  </div>
+                  <p className="text-dark-300 text-sm leading-relaxed">
+                    R. Ademar de Barros, 278<br />
+                    <span className="text-white font-medium">Centro - José Bonifácio/SP</span>
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-4 group">
+                  <div className="w-12 h-12 bg-dark-900 rounded-2xl flex items-center justify-center border border-white/5 group-hover:border-primary-500 transition-colors">
+                    <Phone className="w-5 h-5 text-primary-500" />
+                  </div>
+                  <p className="text-dark-300 text-sm leading-relaxed">
+                    (17) 99219-5185<br />
+                    <span className="text-white font-medium">WhatsApp Oficial</span>
+                  </p>
+                </div>
               </div>
-              <p className="text-xs leading-relaxed uppercase tracking-widest">
-                Seg - Sex: 9h às 20h<br />
-                Sábado: 8h às 18h
-              </p>
             </div>
-            
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-10 h-10 bg-dark-900 rounded-full flex items-center justify-center">
-                <Phone className="w-5 h-5 text-primary-500" />
+
+            <div className="space-y-8">
+              <h4 className="text-white font-bold text-lg uppercase tracking-widest">Horários</h4>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 group">
+                  <div className="w-12 h-12 bg-dark-900 rounded-2xl flex items-center justify-center border border-white/5 group-hover:border-primary-500 transition-colors">
+                    <Clock className="w-5 h-5 text-primary-500" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="text-dark-300 leading-none mb-2 font-medium">Segunda à Sexta</p>
+                    <p className="text-white font-bold text-lg">09h às 20h</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 group">
+                  <div className="w-12 h-12 bg-dark-900 rounded-2xl flex items-center justify-center border border-white/5 group-hover:border-primary-500 transition-colors">
+                    <Clock className="w-5 h-5 text-primary-500" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="text-dark-300 leading-none mb-2 font-medium">Sábado</p>
+                    <p className="text-white font-bold text-lg">08h às 18h</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs leading-relaxed uppercase tracking-widest">
-                (17) 99219-5185<br />
-                @gimenesbarberjr
-              </p>
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-dark-800 flex flex-col items-center space-y-4">
-            <Link to="/admin" className="text-[10px] uppercase tracking-[0.3em] text-dark-500 hover:text-primary-500 transition-colors">
-              Área Administrativa
-            </Link>
-            <p className="text-[10px] text-dark-600 uppercase tracking-[0.2em] font-medium">
-              Direitos autorais Agência FritaKuka
+          <div className="mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+            <p className="text-[10px] text-dark-500 uppercase tracking-[0.3em] font-bold">
+              © 2026 Gimenes Barber Shop • Todos os direitos reservados
             </p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] text-dark-500 uppercase tracking-[0.3em] font-bold">Desenvolvido por</p>
+              <span className="text-[10px] text-primary-500 font-black tracking-widest uppercase">Agência FritaKuka</span>
+            </div>
+            <Link to="/admin" className="text-[10px] text-dark-500 hover:text-primary-500 transition-colors uppercase tracking-[0.3em] font-bold">
+              Área do Profissional
+            </Link>
           </div>
         </div>
       </footer>
