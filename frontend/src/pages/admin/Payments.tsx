@@ -2,22 +2,9 @@
 import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { PaymentStatus, PaymentMethod, PaymentWithDetails } from '../../types'
+import { ptBR } from 'date-fns/locale/pt-BR'
+import { PaymentStatus, PaymentWithDetails } from '../../types'
 import { QrCode, CreditCard, Wallet, CheckCircle, XCircle } from 'lucide-react'
-
-interface PaymentWithDetails {
-  id: number
-  appointment_id: number
-  method: PaymentMethod
-  amount: number
-  status: PaymentStatus
-  external_reference?: string
-  paid_at?: string
-  date_time: string
-  client_name: string
-  service_name: string
-}
 
 export default function AdminPayments() {
   const [payments, setPayments] = useState<PaymentWithDetails[]>([])
@@ -41,8 +28,8 @@ export default function AdminPayments() {
 
   const handleConfirmPayment = async (payment: PaymentWithDetails) => {
     try {
-      const status = payment.method === 'pix' ? 'approved' : 'approved'
-      await api.payments.update(payment.id, { status } as any)
+      const status = 'approved'
+      await api.payments.update(payment.id, { status })
       loadPayments()
     } catch (error) {
       console.error('Error updating payment:', error)
@@ -51,7 +38,7 @@ export default function AdminPayments() {
 
   const handleMarkPaidOnSite = async (payment: PaymentWithDetails) => {
     try {
-      await api.payments.update(payment.id, { status: 'approved', paid_at: new Date().toISOString() } as any)
+      await api.payments.update(payment.id, { status: 'approved' })
       loadPayments()
     } catch (error) {
       console.error('Error updating payment:', error)
@@ -60,7 +47,7 @@ export default function AdminPayments() {
 
   const handleCancelPayment = async (payment: PaymentWithDetails) => {
     try {
-      await api.payments.update(payment.id, { status: 'cancelado' } as any)
+      await api.payments.update(payment.id, { status: 'cancelled' })
       loadPayments()
     } catch (error) {
       console.error('Error cancelling payment:', error)
@@ -69,23 +56,18 @@ export default function AdminPayments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
       case 'approved': return 'bg-green-500/20 text-green-400'
-      case 'pending': return 'bg-blue-500/20 text-blue-400'
       case 'pending': return 'bg-yellow-500/20 text-yellow-400'
-      case 'cancelado': return 'bg-red-500/20 text-red-400'
+      case 'cancelled': return 'bg-red-500/20 text-red-400'
       default: return 'bg-dark-600 text-dark-400'
     }
   }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'approved': return 'Pago via Pix'
-      case 'approved': return 'Pago via Cartao'
-      case 'paid_nubank': return 'Pago via Nubank'
-      case 'pending': return 'Pagar no local'
-      case 'pending': return 'Aguardando'
-      case 'cancelado': return 'Cancelado'
+      case 'approved': return 'Pago'
+      case 'pending': return 'Pendente'
+      case 'cancelled': return 'Cancelado'
       default: return status
     }
   }
@@ -97,7 +79,6 @@ export default function AdminPayments() {
       case 'credit_card': return <CreditCard className="w-4 h-4 text-blue-400" />
       case 'machine': return <CreditCard className="w-4 h-4 text-dark-400" />
       case 'cash': return <Wallet className="w-4 h-4 text-green-400" />
-      case 'cash': return <Wallet className="w-4 h-4 text-dark-400" />
       default: return null
     }
   }
@@ -109,7 +90,6 @@ export default function AdminPayments() {
       case 'credit_card': return 'Cartao'
       case 'machine': return 'Maquina'
       case 'cash': return 'Dinheiro'
-      case 'cash': return 'No local'
       default: return method
     }
   }
@@ -120,11 +100,9 @@ export default function AdminPayments() {
 
   const statusFilters: { label: string; value: 'all' | PaymentStatus }[] = [
     { label: 'Todos', value: 'all' },
-    { label: 'Pago Pix', value: 'approved' },
-    { label: 'Pago Cartao', value: 'approved' },
-    { label: 'No Local', value: 'pending' },
-    { label: 'Aguardando', value: 'pending' },
-    { label: 'Cancelado', value: 'cancelado' }
+    { label: 'Pago', value: 'approved' },
+    { label: 'Pendente', value: 'pending' },
+    { label: 'Cancelado', value: 'cancelled' }
   ]
 
   return (
@@ -169,7 +147,7 @@ export default function AdminPayments() {
                   {filteredPayments.map((payment) => (
                     <tr key={payment.id} className="hover:bg-dark-700/30 transition-colors">
                       <td className="p-4 text-dark-300">
-                        {payment.date_time && format(new Date(payment.date_time), 'dd/MM/yyyy', { locale: ptBR })}
+                        {payment.created_at && format(new Date(payment.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                       </td>
                       <td className="p-4 text-white">{payment.client_name}</td>
                       <td className="p-4 text-dark-300">{payment.service_name}</td>
@@ -207,7 +185,7 @@ export default function AdminPayments() {
                               Recebido
                             </button>
                           )}
-                          {(payment.status === 'pending' || payment.status === 'pending') && (
+                          {payment.status === 'pending' && (
                             <button
                               onClick={() => handleCancelPayment(payment)}
                               className="flex items-center gap-1 text-xs px-3 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
@@ -229,13 +207,4 @@ export default function AdminPayments() {
     </AdminLayout>
   )
 }
-
-
-
-
-
-
-
-
-
 

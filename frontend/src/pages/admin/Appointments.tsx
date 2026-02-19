@@ -4,8 +4,10 @@ import { api } from '../../services/api'
 import { Appointment, Barber } from '../../types'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
-import { format, addDays, subDays } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns';
+import { addDays } from 'date-fns/addDays';
+import { subDays } from 'date-fns/subDays';
+import { ptBR } from 'date-fns/locale/pt-BR'
 import { ChevronLeft, ChevronRight, X, Check } from 'lucide-react'
 
 export default function AdminAppointments() {
@@ -46,7 +48,7 @@ export default function AdminAppointments() {
     }
   }
 
-  const handleStatusChange = async (id: number, status: Appointment['status']) => {
+  const handleStatusChange = async (id: string, status: Appointment['status']) => {
     try {
       await api.appointments.update(id, { status })
       loadAppointments()
@@ -56,7 +58,7 @@ export default function AdminAppointments() {
     }
   }
 
-  const handleCancel = async (id: number) => {
+  const handleCancel = async (id: string) => {
     if (!confirm('Deseja realmente cancelar este agendamento?')) return
     try {
       await api.appointments.cancel(id)
@@ -67,7 +69,7 @@ export default function AdminAppointments() {
     }
   }
 
-  const handleNoShow = async (id: number, clientId: number) => {
+  const handleNoShow = async (id: string, clientId: string) => {
     if (!confirm('Registrar falta para este cliente? Isso aumentarÃ¡ o contador de faltas e aplicarÃ¡ a regra de multa.')) return
     try {
       await api.admin.registerNoShow(clientId)
@@ -78,7 +80,7 @@ export default function AdminAppointments() {
     }
   }
 
-  const handleClearPenalty = async (clientId: number) => {
+  const handleClearPenalty = async (clientId: string) => {
     if (!confirm('Deseja realmente limpar a multa deste cliente?')) return
     try {
       await api.admin.clearPenalty(clientId)
@@ -276,6 +278,12 @@ export default function AdminAppointments() {
     </AdminLayout>
   )
 }
+
+
+
+
+
+
 
 
 

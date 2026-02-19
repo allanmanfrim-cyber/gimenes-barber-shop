@@ -79,7 +79,7 @@ export default function AdminServices() {
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja remover este servico?')) return
     try {
       await api.services.delete(id)
@@ -192,6 +192,7 @@ export default function AdminServices() {
     </AdminLayout>
   )
 }
+
 
 
 

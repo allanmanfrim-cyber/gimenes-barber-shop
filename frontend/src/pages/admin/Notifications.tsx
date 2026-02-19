@@ -3,8 +3,8 @@ import { AdminLayout } from '../../components/admin/AdminLayout'
 import { Notification, NotificationStats } from '../../types'
 import { api } from '../../services/api'
 import { Bell, Mail, MessageSquare, CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale/pt-BR'
 
 export default function AdminNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -197,8 +197,8 @@ export default function AdminNotifications() {
                       
                       <p className="text-dark-500 text-xs mt-1">
                         {notification.sent_at 
-                          ? format(parseISO(notification.sent_at), "dd/MM HH:mm", { locale: ptBR })
-                          : format(parseISO(notification.created_at), "dd/MM HH:mm", { locale: ptBR })
+                          ? format(new Date(notification.sent_at), "dd/MM HH:mm", { locale: ptBR })
+                          : format(new Date(notification.created_at), "dd/MM HH:mm", { locale: ptBR })
                         }
                       </p>
                     </div>
@@ -212,6 +212,9 @@ export default function AdminNotifications() {
     </AdminLayout>
   )
 }
+
+
+
 
 
 

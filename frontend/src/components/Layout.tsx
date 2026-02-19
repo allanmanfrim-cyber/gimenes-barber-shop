@@ -1,7 +1,7 @@
 ﻿import { ReactNode } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import { ChevronLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+
 
 interface LayoutProps {
   children: ReactNode
@@ -46,6 +46,7 @@ export function Layout({ children, showHeader = true, title, onBack }: LayoutPro
     </div>
   )
 }
+
 
 
 

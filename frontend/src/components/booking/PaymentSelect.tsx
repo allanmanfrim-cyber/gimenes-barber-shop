@@ -2,8 +2,8 @@
 import { BookingData, PaymentMethod, PaymentType } from '../../types'
 import { Button } from '../ui/Button'
 import { Clock, Check, CreditCard, Banknote, Star, ShieldCheck, Wallet } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale/pt-BR'
 
 interface PaymentSelectProps {
   bookingData: BookingData
@@ -22,7 +22,7 @@ export function PaymentSelect({
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(bookingData.paymentMethod || 'pix')
 
   const formattedDate = bookingData.date
-    ? format(parseISO(bookingData.date), "dd 'de' MMMM", { locale: ptBR })
+    ? format(new Date(bookingData.date), "dd 'de' MMMM", { locale: ptBR })
     : ''
 
   const handleTypeChange = (type: PaymentType) => {
@@ -227,6 +227,7 @@ export function PaymentSelect({
     </div>
   )
 }
+
 
 
 

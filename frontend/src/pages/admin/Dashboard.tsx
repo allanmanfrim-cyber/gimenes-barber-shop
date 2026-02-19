@@ -3,7 +3,7 @@ import { AdminLayout } from '../../components/admin/AdminLayout'
 import { api } from '../../services/api'
 import { Appointment } from '../../types'
 import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { ptBR } from 'date-fns/locale/pt-BR'
 import { Calendar, Clock, TrendingUp, Scissors, ChevronRight, Star } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -190,6 +190,8 @@ function StatCard({
     </div>
   )
 }
+
+
 
 
 

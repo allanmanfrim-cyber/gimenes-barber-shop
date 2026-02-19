@@ -140,6 +140,8 @@ export default function Booking() {
         <ClientForm
           initialName={bookingData.clientName}
           initialWhatsapp={bookingData.clientWhatsapp}
+          initialEmail={bookingData.clientEmail}
+          initialBirthDate={bookingData.clientBirthDate}
           initialNotes={bookingData.notes}
           onSubmit={setClientInfo}
         />
@@ -164,6 +166,10 @@ export default function Booking() {
     </Layout>
   )
 }
+
+
+
+
 
 
 

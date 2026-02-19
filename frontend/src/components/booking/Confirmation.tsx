@@ -2,8 +2,8 @@
 import { Appointment, PaymentStatus } from '../../types'
 import { Button } from '../ui/Button'
 import { CheckCircle, Copy, Check, Bell, Mail, MessageSquare, Star, Calendar, User, Scissors, DollarSign } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale/pt-BR'
 import QRCode from 'qrcode'
 
 interface ConfirmationProps {
@@ -19,7 +19,7 @@ function getPaymentStatusText(status: PaymentStatus): string {
     case 'rejected': return 'Pagamento Rejeitado'
     case 'expired': return 'Pagamento Expirado'
     case 'pending': return 'Aguardando pagamento'
-    case 'cancelado': return 'Cancelado'
+    case 'cancelled': return 'Cancelado'
     default: return status
   }
 }
@@ -32,7 +32,7 @@ function getPaymentStatusColor(status: PaymentStatus): string {
       return 'bg-primary-500 text-black'
     case 'pending':
       return 'bg-amber-500 text-black'
-    case 'cancelado':
+    case 'cancelled':
       return 'bg-red-500 text-white'
     default:
       return 'bg-neutral-800 text-neutral-400'
@@ -67,7 +67,7 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
   }
 
   const formattedDateTime = appointment.date_time
-    ? format(parseISO(appointment.date_time), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })
+    ? format(new Date(appointment.date_time), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })
     : ''
 
   const paymentStatus = appointment.payment?.status || 'pending'
@@ -127,7 +127,7 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest pt-1">Valor Total</span>
             </div>
             <span className="text-primary-500 font-black text-xl">
-              R$ {appointment.service?.price.toFixed(2).replace('.', ',')}
+              R$ {appointment.service?.price?.toFixed(2)?.replace('.', ',')}
             </span>
           </div>
 
@@ -204,13 +204,3 @@ export function Confirmation({ appointment, pixCode, pixQrCodeBase64, onFinish }
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-

@@ -10,7 +10,7 @@ export type PaymentStatus =
   | "approved"
   | "rejected"
   | "expired"
-  | "cancelado"
+  | "cancelled"
 
 export type AppointmentStatus =
   | "pendente_pagamento"
@@ -36,20 +36,29 @@ export interface User {
   email: string
   role: "admin" | "barber"
   barberId?: string
-  tenant_id?: number
+  tenant_id?: string
 }
 
 export interface Notification {
   id: string
   title: string
   message: string
-  read: boolean
+  type: string
+  status: string
+  recipient_type?: string
+  recipient_contact?: string
+  error_message?: string
+  sent_at?: string
   created_at: string
+  read?: boolean
 }
 
 export interface NotificationStats {
   total: number
   unread: number
+  sent: number
+  failed: number
+  pending: number
 }
 
 export interface Payment {
@@ -71,8 +80,8 @@ export interface PaymentWithDetails extends Payment {
 }
 
 export interface Service {
-  id: number
-  tenant_id: number
+  id: string
+  tenant_id: string
   name: string
   duration_minutes: number
   price: number
@@ -80,8 +89,8 @@ export interface Service {
 }
 
 export interface Client {
-  id: number
-  tenant_id: number
+  id: string
+  tenant_id: string
   name: string
   whatsapp: string
   email?: string
@@ -92,11 +101,11 @@ export interface Client {
 }
 
 export interface Appointment {
-  id: number
-  tenant_id: number
-  client_id: number
-  barber_id: number
-  service_id: number
+  id: string
+  tenant_id: string
+  client_id: string
+  barber_id: string
+  service_id: string
   date_time: string
   status: AppointmentStatus
   notes?: string
@@ -110,6 +119,13 @@ export interface Appointment {
 export interface TimeSlot {
   time: string
   available: boolean
+}
+
+export interface BusinessHours {
+  day_of_week: number
+  open_time: string
+  close_time: string
+  is_open: boolean | number
 }
 
 export type PaymentType = 'online' | 'presencial'
@@ -134,8 +150,4 @@ export interface AuthState {
   token: string | null
   isAuthenticated: boolean
 }
-
-
-
-
 
