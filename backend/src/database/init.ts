@@ -132,7 +132,8 @@ function seedDatabase() {
   ]
 
   const barbers = [
-    { name: 'Junior Gimenes', whatsapp: '17992195185' },
+    { name: 'Juninho', whatsapp: '17992195185' },
+    { name: 'Júnior Gimenes', whatsapp: '17992195185' },
     { name: 'Abner William', whatsapp: '11948379063' }
   ]
 
