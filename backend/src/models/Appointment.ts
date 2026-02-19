@@ -8,11 +8,12 @@ import { Payment } from './Payment.js'
 
 export interface Appointment {
   id: number
+  tenant_id: number
   client_id: number
   barber_id: number
   service_id: number
   date_time: string
-  status: string
+  status: 'pendente_pagamento' | 'confirmado' | 'cancelado' | 'no_show' | 'concluido'
   notes: string | null
   reference_images: string | null
   created_at: string
@@ -51,7 +52,7 @@ const saveBase64Image = (base64String: string, id: number, index: number): strin
 }
 
 export const AppointmentModel = {
-  findAll: (filters?: { date?: string; barberId?: number; status?: string }): Appointment[] => {
+  findAll: (filters?: { date?: string; barberId?: number; status?: string; tenantId?: number }): Appointment[] => {
     let query = `
       SELECT 
         a.*,
@@ -59,7 +60,7 @@ export const AppointmentModel = {
         c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
         b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active,
         s.name as service_name, s.duration_minutes, s.price, s.active as service_active,
-        p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
+        p.id as payment_id, p.metodo_visual as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
       LEFT JOIN clients c ON a.client_id = c.id
       LEFT JOIN barbers b ON a.barber_id = b.id
@@ -68,6 +69,14 @@ export const AppointmentModel = {
       WHERE 1=1
     `
     const params: (string | number)[] = []
+
+    // Tenant Filter
+    if (filters?.tenantId) {
+        query += ' AND a.tenant_id = ?'
+        params.push(filters.tenantId)
+    } else {
+        query += ' AND a.tenant_id = 1'
+    }
 
     if (filters?.date) {
       query += ' AND DATE(a.date_time) = ?'
@@ -96,7 +105,7 @@ export const AppointmentModel = {
         c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
         b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active,
         s.name as service_name, s.duration_minutes, s.price, s.active as service_active,
-        p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
+        p.id as payment_id, p.metodo_visual as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
       LEFT JOIN clients c ON a.client_id = c.id
       LEFT JOIN barbers b ON a.barber_id = b.id
@@ -108,7 +117,8 @@ export const AppointmentModel = {
     return row ? formatAppointmentRow(row) : undefined
   },
 
-  findConflicts: (barberId: number, dateTime: string, durationMinutes: number, excludeId?: number): Appointment[] => {
+  // Logica de conflito atualizada: ignora cancelados e no_show
+  findConflicts: (barberId: number, dateTime: string, durationMinutes: number, excludeId?: number, tenantId: number = 1): Appointment[] => {
     const endTime = new Date(new Date(dateTime).getTime() + durationMinutes * 60000).toISOString()
     
     let query = `
@@ -116,14 +126,15 @@ export const AppointmentModel = {
       FROM appointments a
       JOIN services s ON a.service_id = s.id
       WHERE a.barber_id = ?
-        AND a.status NOT IN ('cancelled')
+        AND a.tenant_id = ?
+        AND a.status NOT IN ('cancelado', 'no_show')
         AND (
           (a.date_time <= ? AND datetime(a.date_time, '+' || s.duration_minutes || ' minutes') > ?)
           OR (a.date_time < ? AND datetime(a.date_time, '+' || s.duration_minutes || ' minutes') >= ?)
           OR (a.date_time >= ? AND a.date_time < ?)
         )
     `
-    const params: (string | number)[] = [barberId, dateTime, dateTime, endTime, endTime, dateTime, endTime]
+    const params: (string | number)[] = [barberId, tenantId, dateTime, dateTime, endTime, endTime, dateTime, endTime]
 
     if (excludeId) {
       query += ' AND a.id != ?'
@@ -140,22 +151,25 @@ export const AppointmentModel = {
     dateTime: string
     notes?: string
     referenceImages?: string[]
+    tenantId?: number
   }): Appointment => {
-    // 1. Inserir primeiro para obter o ID
+    const tenantId = data.tenantId || 1
+    
+    // Status inicial agora eh 'pendente_pagamento' por padrao
     const result = db.prepare(`
-      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, status)
-      VALUES (?, ?, ?, ?, ?, 'confirmed')
+      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, status, tenant_id)
+      VALUES (?, ?, ?, ?, ?, 'pendente_pagamento', ?)
     `).run(
       data.clientId, 
       data.barberId, 
       data.serviceId, 
       data.dateTime, 
-      data.notes || null
+      data.notes || null,
+      tenantId
     )
     
     const id = result.lastInsertRowid as number
     
-    // 2. Processar imagens se houver
     let savedUrls: string[] = []
     if (data.referenceImages && data.referenceImages.length > 0) {
       savedUrls = data.referenceImages
@@ -189,7 +203,7 @@ export const AppointmentModel = {
   },
 
   cancel: (id: number): boolean => {
-    const result = db.prepare("UPDATE appointments SET status = 'cancelled' WHERE id = ?").run(id)
+    const result = db.prepare("UPDATE appointments SET status = 'cancelado' WHERE id = ?").run(id)
     if (result.changes > 0) {
       db.prepare("UPDATE payments SET status = 'cancelled' WHERE appointment_id = ?").run(id)
     }
@@ -200,6 +214,7 @@ export const AppointmentModel = {
 function formatAppointmentRow(row: any): Appointment {
   return {
     id: row.id,
+    tenant_id: row.tenant_id,
     client_id: row.client_id,
     barber_id: row.barber_id,
     service_id: row.service_id,
@@ -237,10 +252,10 @@ function formatAppointmentRow(row: any): Appointment {
     payment: row.payment_id ? {
       id: row.payment_id,
       appointment_id: row.id,
-      method: row.payment_method,
+      metodo_visual: row.payment_method, // mapped
       amount: row.payment_amount,
       status: row.payment_status,
       created_at: ''
-    } : undefined
+    } as any : undefined
   }
 }

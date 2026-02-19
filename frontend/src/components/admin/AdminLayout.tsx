@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react'
+﻿import { ReactNode, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -32,6 +32,7 @@ const menuItems = [
   { path: '/admin/aniversariantes', label: 'Aniversariantes', icon: Gift },
   { path: '/admin/pagamentos', label: 'Pagamentos', icon: CreditCard },
   { path: '/admin/notificacoes', label: 'Notificacoes', icon: Bell },
+  { path: '/admin/layout', label: 'Layout', icon: Palette },
   { path: '/admin/configuracoes', label: 'Configuracoes', icon: Settings }
 ]
 
@@ -176,3 +177,4 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     </div>
   )
 }
+

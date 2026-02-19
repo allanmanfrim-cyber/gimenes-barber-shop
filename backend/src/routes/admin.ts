@@ -1,3 +1,4 @@
+﻿import { TenantConfigModel } from '../models/TenantConfig.js'
 import { Router } from 'express'
 import { authMiddleware } from '../middleware/auth.js'
 import { AppointmentModel } from '../models/Appointment.js'
@@ -293,6 +294,25 @@ router.post('/clients/:id/clear-penalty', (req, res) => {
     res.json({ message: 'Multa limpa com sucesso' })
   } catch (error) {
     res.status(500).json({ message: 'Erro ao limpar multa' })
+  }
+})
+
+
+router.get("/layout", (_req, res) => {
+  try {
+    const config = TenantConfigModel.findByTenantId("default")
+    res.json({ config })
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar configuracoes de layout" })
+  }
+})
+
+router.put("/layout", (req, res) => {
+  try {
+    const config = TenantConfigModel.update("default", req.body)
+    res.json({ config })
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao atualizar configuracoes de layout" })
   }
 })
 

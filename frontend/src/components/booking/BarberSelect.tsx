@@ -18,29 +18,13 @@ export function BarberSelect({ barbers, loading, onSelect }: BarberSelectProps) 
     )
   }
 
+  // Ordenar garantindo que a ordem venha do backend ou fallback
+  const sortedBarbers = [...barbers].sort((a, b) => (a.display_order || 99) - (b.display_order || 99))
+
   return (
     <div className="space-y-3">
-      <Card
-        hoverable
-        onClick={() => onSelect(null)}
-        className="cursor-pointer"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-dark-700 rounded-full flex items-center justify-center">
-            <Users className="w-6 h-6 text-primary-500" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-white">
-              Qualquer Barbeiro
-            </h3>
-            <p className="text-sm text-dark-400">
-              Primeiro disponivel no horario
-            </p>
-          </div>
-        </div>
-      </Card>
-
-      {barbers.map((barber) => (
+      {/* Lista de Barbeiros Especificos */}
+      {sortedBarbers.map((barber) => (
         <Card
           key={barber.id}
           hoverable
@@ -62,6 +46,27 @@ export function BarberSelect({ barbers, loading, onSelect }: BarberSelectProps) 
           </div>
         </Card>
       ))}
+
+      {/* Qualquer Barbeiro - Movido para o final conforme solicitado */}
+      <Card
+        hoverable
+        onClick={() => onSelect(null)}
+        className="cursor-pointer mt-4 border-primary-500/30" // Destaque sutil
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-dark-700 rounded-full flex items-center justify-center">
+            <Users className="w-6 h-6 text-primary-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">
+              Qualquer Barbeiro
+            </h3>
+            <p className="text-sm text-dark-400">
+              Disponivel no horario
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

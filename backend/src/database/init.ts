@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3'
+﻿import Database from 'better-sqlite3'
 import path from 'path'
 import bcrypt from 'bcryptjs'
 import fs from 'fs'
@@ -124,16 +124,16 @@ function seedDatabase() {
     { name: 'Corte de Cabelo', duration_minutes: 30, price: 45.00 },
     { name: 'Barba', duration_minutes: 20, price: 30.00 },
     { name: 'Corte de Cabelo + Barba', duration_minutes: 60, price: 60.00 },
-    { name: 'Corte cabelo + hidratação', duration_minutes: 60, price: 60.00 },
-    { name: 'Corte de Cabelo + Barba + Hidratação', duration_minutes: 60, price: 75.00 },
-    { name: 'Pézinho', duration_minutes: 15, price: 15.00 },
+    { name: 'Corte cabelo + hidrataÃ§Ã£o', duration_minutes: 60, price: 60.00 },
+    { name: 'Corte de Cabelo + Barba + HidrataÃ§Ã£o', duration_minutes: 60, price: 75.00 },
+    { name: 'PÃ©zinho', duration_minutes: 15, price: 15.00 },
     { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },
-    { name: 'Só Hidratação', duration_minutes: 30, price: 25.00 }
+    { name: 'SÃ³ HidrataÃ§Ã£o', duration_minutes: 30, price: 25.00 }
   ]
 
   const barbers = [
     { name: 'Juninho', whatsapp: '17992195185' },
-    { name: 'Júnior Gimenes', whatsapp: '17992195185' },
+    { name: 'JÃºnior Gimenes', whatsapp: '17992195185' },
     { name: 'Abner William', whatsapp: '11948379063' }
   ]
 
@@ -176,6 +176,36 @@ function seedDatabase() {
     }
   }
 
+  
+  // Sync Test Payment for Checkout
+  const testClient = db.prepare('SELECT id FROM clients LIMIT 1').get() as { id: number }
+  const testBarber = db.prepare('SELECT id FROM barbers LIMIT 1').get() as { id: number }
+  const testService = db.prepare('SELECT id FROM services LIMIT 1').get() as { id: number }
+  
+  if (testClient && testBarber && testService) {
+    const existingPayment = db.prepare('SELECT id FROM payments LIMIT 1').get()
+    if (!existingPayment) {
+      const appointmentId = db.prepare('INSERT INTO appointments (client_id, barber_id, service_id, date_time, status) VALUES (?, ?, ?, ?, ?)').run(testClient.id, testBarber.id, testService.id, new Date().toISOString(), 'confirmed').lastInsertRowid
+      db.prepare('INSERT INTO payments (appointment_id, method, amount, status) VALUES (?, ?, ?, ?)').run(appointmentId, 'pix', 50.00, 'pending')
+      console.log('Seed: Test payment created for Checkout page')
+    }
+  }
+
+  
+  // Sync Tenant Config
+  const existingConfig = db.prepare("SELECT id FROM tenant_config WHERE tenant_id = ?").get("default")
+  if (!existingConfig) {
+    db.prepare(`INSERT INTO tenant_config (
+      tenant_id, nome_barbearia, logotipo_url, cor_primaria, cor_secundaria, cor_fundo,
+      whatsapp, telefone, instagram, endereco, horario_funcionamento
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      "default", "Gimenes Barber Shop", "/images/logo.png", "#eab308", "#171717", "#0a0a0a",
+      "17992195185", "17992195185", "gimenes_barber", "R. Ademar de Barros, 278, Centro - José Bonifácio/SP",
+      "Seg-Sex: 09h às 20h, Sáb: 08h às 18h"
+    )
+    console.log("Seed: Default tenant config created")
+  }
+
   // Sync Admin User
   const existingAdmin = db.prepare('SELECT id FROM users WHERE username = ?').get('admin')
   if (!existingAdmin) {
@@ -184,3 +214,4 @@ function seedDatabase() {
     console.log('Admin user created: admin / admin123')
   }
 }
+

@@ -1,3 +1,5 @@
+﻿import { ThemeProvider } from './context/ThemeContext'
+import AdminLayoutSettings from './pages/admin/LayoutSettings'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { TestSwitcher } from './components/TestSwitcher'
@@ -17,6 +19,7 @@ import AdminSettings from './pages/admin/Settings'
 function App() {
   return (
     <AuthProvider>
+      <ThemeProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -30,12 +33,14 @@ function App() {
           <Route path="/admin/aniversariantes" element={<AdminBirthdays />} />
           <Route path="/admin/pagamentos" element={<AdminPayments />} />
           <Route path="/admin/notificacoes" element={<AdminNotifications />} />
-          <Route path="/admin/configuracoes" element={<AdminSettings />} />
+          <Route path="/admin/configuracoes" element={<AdminSettings />} />`n          <Route path="/admin/layout" element={<AdminLayoutSettings />} />
         </Routes>
-        <TestSwitcher />
+        
       </BrowserRouter>
+          </ThemeProvider>
     </AuthProvider>
   )
 }
 
 export default App
+

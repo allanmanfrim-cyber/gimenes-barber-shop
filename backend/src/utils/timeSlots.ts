@@ -10,7 +10,8 @@ export interface TimeSlot {
 export function generateTimeSlots(
   date: string,
   barberId: number | 'any',
-  serviceDuration: number
+  serviceDuration: number,
+  tenantId: number = 1
 ): TimeSlot[] {
   const targetDate = new Date(date + 'T12:00:00')
   const dayOfWeek = targetDate.getDay()
@@ -18,7 +19,6 @@ export function generateTimeSlots(
   const businessHours = BusinessHoursModel.findByDay(dayOfWeek)
   const isOpen = businessHours && businessHours.is_open
   
-  // Se for domingo (ou fechado), usamos um horario padrao so para mostrar os slots desabilitados
   const openTime = isOpen ? businessHours.open_time : '09:00'
   const closeTime = isOpen ? businessHours.close_time : '19:00'
 
@@ -59,13 +59,14 @@ export function generateTimeSlots(
 
       let available = false
       if (isOpen) {
-        // Almoço das 14:30 às 15:00 (regra global da barbearia)
+        // Almoco fixo (regra de negocio existente)
         if (timeStr === '14:30') {
           available = false
         } else {
           for (const bid of barberIds) {
             const dateTime = `${date}T${timeStr}:00`
-            const conflicts = AppointmentModel.findConflicts(bid, dateTime, serviceDuration)
+            // Chamada atualizada com tenantId e logica de conflito robusta
+            const conflicts = AppointmentModel.findConflicts(bid, dateTime, serviceDuration, undefined, tenantId)
             if (conflicts.length === 0) {
               available = true
               break
@@ -84,13 +85,14 @@ export function generateTimeSlots(
 export function findAvailableBarber(
   date: string,
   time: string,
-  serviceDuration: number
+  serviceDuration: number,
+  tenantId: number = 1
 ): number | null {
   const activeBarbers = BarberModel.findAll(true)
   const dateTime = `${date}T${time}:00`
 
   for (const barber of activeBarbers) {
-    const conflicts = AppointmentModel.findConflicts(barber.id, dateTime, serviceDuration)
+    const conflicts = AppointmentModel.findConflicts(barber.id, dateTime, serviceDuration, undefined, tenantId)
     if (conflicts.length === 0) {
       return barber.id
     }

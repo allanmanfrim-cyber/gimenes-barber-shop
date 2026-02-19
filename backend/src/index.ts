@@ -1,3 +1,4 @@
+﻿import configRoutes from './routes/config.js'
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
@@ -34,7 +35,7 @@ try {
   console.error('Failed to initialize database:', error)
 }
 
-// Configura automações
+// Configura automaÃ§Ãµes
 try {
   setupBirthdayAutomation()
   setupDailyReportAutomation()
@@ -70,7 +71,7 @@ const targetDist = fs.existsSync(frontendDist) ? frontendDist : alternativeFront
 
 if (fs.existsSync(targetDist)) {
   app.use(express.static(targetDist))
-  // Qualquer rota que não seja API, manda o index.html do frontend
+  // Qualquer rota que nÃ£o seja API, manda o index.html do frontend
   app.get(/^(?!\/api).+/, (_req, res) => {
     res.sendFile(path.join(targetDist, 'index.html'))
   })
@@ -80,3 +81,4 @@ const portNumber = Number(PORT)
 app.listen(portNumber, '0.0.0.0', () => {
   console.log(`Server listening on port ${portNumber}`)
 })
+

@@ -18,6 +18,27 @@ export function applyMigrations() {
   tryExec(`ALTER TABLE clients ADD COLUMN faltas_sem_aviso INTEGER DEFAULT 0;`, "faltas_sem_aviso to clients")
   tryExec(`ALTER TABLE clients ADD COLUMN status_multa TEXT DEFAULT \"nenhuma\";`, "status_multa to clients")
 
+  
+  // 5. Add tenant_config table
+  tryExec(`CREATE TABLE IF NOT EXISTS tenant_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT DEFAULT "default",
+    nome_barbearia TEXT,
+    logotipo_url TEXT,
+    favicon_url TEXT,
+    cor_primaria TEXT DEFAULT "#eab308",
+    cor_secundaria TEXT DEFAULT "#171717",
+    cor_fundo TEXT DEFAULT "#0a0a0a",
+    modo_tema TEXT DEFAULT "escuro",
+    whatsapp TEXT,
+    telefone TEXT,
+    instagram TEXT,
+    endereco TEXT,
+    horario_funcionamento TEXT,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+  );`, "tenant_config table")
+
   // 4. Add whatsapp to barbers
   tryExec(`ALTER TABLE barbers ADD COLUMN whatsapp TEXT;`, "whatsapp to barbers")
 
@@ -31,3 +52,4 @@ export function applyMigrations() {
     console.error("Migration: Error updating service durations:", error?.message || error)
   }
 }
+

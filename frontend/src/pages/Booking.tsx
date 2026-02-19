@@ -6,14 +6,10 @@ import { ServiceSelect } from '../components/booking/ServiceSelect'
 import { BarberSelect } from '../components/booking/BarberSelect'
 import { DateTimeSelect } from '../components/booking/DateTimeSelect'
 import { ClientForm } from '../components/booking/ClientForm'
-import { ReferenceImageUpload } from '../components/booking/ReferenceImageUpload'
 import { PaymentSelect } from '../components/booking/PaymentSelect'
-import { PixPayment } from '../components/booking/PixPayment'
-import { NubankPayment } from '../components/booking/NubankPayment'
-import { CardForm } from '../components/booking/CardForm'
 import { Confirmation } from '../components/booking/Confirmation'
 import { BookingStepper } from '../components/booking/BookingStepper'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react' // Import X icon
 
 export default function Booking() {
   const navigate = useNavigate()
@@ -33,11 +29,8 @@ export default function Booking() {
     selectBarber,
     selectDateTime,
     setClientInfo,
-    confirmClientInfo,
-    setReferenceImages,
     setPaymentMethod,
     submitBooking,
-    goToConfirmation,
     goBack,
     reset
   } = useBooking()
@@ -47,18 +40,14 @@ export default function Booking() {
     loadBarbers()
   }, [loadServices, loadBarbers])
 
-  const stepTitles: Record<number | string, string> = {
-    1: 'Barbeiro',
-    2: 'Serviço',
-    3: 'Data e Horário',
-    4: 'Seus Dados',
-    4.5: 'Fotos de Referência',
-    5: 'Pagamento',
-    6: 'Pagamento via Pix',
-    7: 'Pagamento via Nubank',
-    8: 'Adicionar Cartão',
-    9: 'Confirmação'
-  }
+  const stepTitles = [
+    'Servico',
+    'Barbeiro',
+    'Data e Horario',
+    'Seus Dados',
+    'Pagamento',
+    'Confirmacao'
+  ]
 
   const handleBack = () => {
     if (step === 1) {
@@ -68,47 +57,49 @@ export default function Booking() {
     }
   }
 
+  // Botao para cancelar e voltar ao inicio
+  const handleCancel = () => {
+    if (window.confirm('Deseja cancelar o agendamento e voltar ao inicio?')) {
+      reset()
+      navigate('/')
+    }
+  }
+
   const handleFinish = () => {
     reset()
     navigate('/')
   }
 
-  const handlePaymentConfirmed = () => {
-    goToConfirmation()
-  }
-
-  const handlePaymentCancel = () => {
-    goBack()
-  }
-
-  const handleCardSubmit = async () => {
-    goToConfirmation()
-  }
-
-  const showStepper = step <= 5
-  const showBackButton = step <= 5
-  const showTitle = step <= 5
-
   return (
     <Layout showHeader={false}>
       <div className="mb-6">
-        {showBackButton && (
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Voltar
-          </button>
-        )}
+        <div className="flex items-center justify-between mb-4">
+            {step < 6 && (
+                <button
+                    onClick={handleBack}
+                    className="flex items-center gap-2 text-dark-400 hover:text-white transition-colors border border-dark-700 rounded-lg px-3 py-1.5 bg-dark-800"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span className="text-sm font-medium">Voltar</span>
+                </button>
+            )}
+
+            {step > 1 && step < 6 && (
+                <button
+                    onClick={handleCancel}
+                    className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors px-3 py-1.5"
+                >
+                    <X className="w-4 h-4" />
+                    <span className="text-sm font-medium">Cancelar</span>
+                </button>
+            )}
+        </div>
         
-        {showTitle && (
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {stepTitles[step] || ''}
-          </h2>
-        )}
+        <h2 className="text-2xl font-bold text-white mb-2">
+          {stepTitles[step - 1]}
+        </h2>
         
-        {showStepper && <BookingStepper currentStep={step > 4 ? Math.floor(Number(step)) + 1 : Number(step)} totalSteps={6} />}
+        <BookingStepper currentStep={step} totalSteps={6} />
       </div>
 
       {error && (
@@ -118,18 +109,18 @@ export default function Booking() {
       )}
 
       {step === 1 && (
-        <BarberSelect
-          barbers={barbers}
-          loading={loading}
-          onSelect={selectBarber}
-        />
-      )}
-
-      {step === 2 && (
         <ServiceSelect
           services={services}
           loading={loading}
           onSelect={selectService}
+        />
+      )}
+
+      {step === 2 && (
+        <BarberSelect
+          barbers={barbers}
+          loading={loading}
+          onSelect={selectBarber}
         />
       )}
 
@@ -149,24 +140,8 @@ export default function Booking() {
         <ClientForm
           initialName={bookingData.clientName}
           initialWhatsapp={bookingData.clientWhatsapp}
-          initialEmail={bookingData.clientEmail}
-          initialBirthDate={bookingData.clientBirthDate}
           initialNotes={bookingData.notes}
-          onSubmit={(name, whatsapp, email, birthDate, notes) => {
-            setClientInfo(name, whatsapp, email, birthDate, notes)
-            confirmClientInfo()
-          }}
-        />
-      )}
-
-      {step === 4.5 && (
-        <ReferenceImageUpload
-          onImagesSelected={setReferenceImages}
-          onNext={() => {
-            // Ir para o passo 5 (Pagamento)
-            setPaymentMethod('pix', 'online')
-          }}
-          onBack={handleBack}
+          onSubmit={setClientInfo}
         />
       )}
 
@@ -180,42 +155,9 @@ export default function Booking() {
       )}
 
       {step === 6 && appointmentResult && (
-        <PixPayment
-          pixCode={appointmentResult.pixCode || ''}
-          pixQrCodeBase64={appointmentResult.pixQrCodeBase64}
-          amount={bookingData.service?.price || 0}
-          appointmentId={appointmentResult.appointment.id}
-          onConfirmed={handlePaymentConfirmed}
-          onCancel={handlePaymentCancel}
-          onBack={handlePaymentCancel}
-        />
-      )}
-
-      {step === 7 && appointmentResult && (
-        <NubankPayment
-          pixCode={appointmentResult.pixCode || ''}
-          amount={bookingData.service?.price || 0}
-          appointmentId={appointmentResult.appointment.id}
-          onConfirmed={handlePaymentConfirmed}
-          onCancel={handlePaymentCancel}
-          onBack={handlePaymentCancel}
-        />
-      )}
-
-      {step === 8 && appointmentResult && (
-        <CardForm
-          amount={bookingData.service?.price || 0}
-          loading={loading}
-          onSubmit={handleCardSubmit}
-          onBack={handlePaymentCancel}
-        />
-      )}
-
-      {step === 9 && appointmentResult && (
         <Confirmation
           appointment={appointmentResult.appointment}
           pixCode={appointmentResult.pixCode}
-          pixQrCodeBase64={appointmentResult.pixQrCodeBase64}
           onFinish={handleFinish}
         />
       )}

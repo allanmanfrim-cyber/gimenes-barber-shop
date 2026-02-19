@@ -1,3 +1,4 @@
+﻿import { useTheme } from '../context/ThemeContext'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
@@ -6,6 +7,7 @@ import { api } from '../services/api'
 import { Service, Barber } from '../types'
 
 export default function Home() {
+  const { config } = useTheme();
   const [services, setServices] = useState<Service[]>([])
   const [barbers, setBarbers] = useState<Barber[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,11 +39,11 @@ export default function Home() {
             <div className="w-10 h-10 bg-dark-800 rounded-xl overflow-hidden p-1 border border-white/10">
               <img src="/images/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="text-white font-bold tracking-tight text-lg">Gimenes Barber</span>
+            <span className="text-white font-bold tracking-tight text-lg">{config.nome_barbearia}</span>
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#servicos" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">Serviços</a>
+            <a href="#servicos" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">ServiÃ§os</a>
             <a href="#barbeiros" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">Barbeiros</a>
             <a href="#unidades" className="text-sm text-dark-400 hover:text-primary-500 transition-colors uppercase tracking-widest font-medium">Unidades</a>
           </nav>
@@ -64,17 +66,17 @@ export default function Home() {
         
         <h1 className="text-6xl md:text-8xl font-black text-white text-center mb-6 tracking-tighter leading-[0.9]">
           ESTILO &<br />
-          <span className="text-primary-500">PRECISÃO.</span>
+          <span className="text-primary-500">PRECISÃƒO.</span>
         </h1>
         
         <p className="text-dark-400 text-center mb-12 text-lg md:text-xl max-w-lg leading-relaxed font-medium">
-          Onde a tradição da barbearia clássica encontra o acabamento moderno de alto nível.
+          Onde a tradiÃ§Ã£o da barbearia clÃ¡ssica encontra o acabamento moderno de alto nÃ­vel.
         </p>
 
         <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-sm md:max-w-none justify-center">
           <Link to="/agendar" className="w-full md:w-auto">
             <Button fullWidth size="lg" className="h-16 px-12 text-lg rounded-full shadow-2xl shadow-primary-500/20 group">
-              Agendar Horário
+              Agendar HorÃ¡rio
               <Star className="w-5 h-5 ml-2 fill-dark-900 group-hover:scale-125 transition-transform" />
             </Button>
           </Link>
@@ -90,7 +92,7 @@ export default function Home() {
                 <ShieldCheck className="w-7 h-7 text-primary-500" />
               </div>
               <h3 className="text-white font-bold text-xl mb-3">Qualidade Premium</h3>
-              <p className="text-dark-400 text-sm leading-relaxed">Equipamentos de última geração e produtos de marcas renomadas mundialmente.</p>
+              <p className="text-dark-400 text-sm leading-relaxed">Equipamentos de Ãºltima geraÃ§Ã£o e produtos de marcas renomadas mundialmente.</p>
             </div>
             
             <div className="p-8 bg-dark-800/50 border border-white/5 rounded-[2rem] flex flex-col items-center text-center">
@@ -98,26 +100,26 @@ export default function Home() {
                 <Sparkles className="w-7 h-7 text-primary-500" />
               </div>
               <h3 className="text-white font-bold text-xl mb-3">Ambiente Exclusivo</h3>
-              <p className="text-dark-400 text-sm leading-relaxed">Conforto absoluto com ar-condicionado, café gourmet e trilha sonora selecionada.</p>
+              <p className="text-dark-400 text-sm leading-relaxed">Conforto absoluto com ar-condicionado, cafÃ© gourmet e trilha sonora selecionada.</p>
             </div>
 
             <div className="p-8 bg-dark-800/50 border border-white/5 rounded-[2rem] flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-primary-500/10 rounded-2xl flex items-center justify-center mb-6">
                 <Clock className="w-7 h-7 text-primary-500" />
               </div>
-              <h3 className="text-white font-bold text-xl mb-3">Horário Pontual</h3>
+              <h3 className="text-white font-bold text-xl mb-3">HorÃ¡rio Pontual</h3>
               <p className="text-dark-400 text-sm leading-relaxed">Respeito total ao seu tempo com sistema de agendamento preciso e sem atrasos.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Serviços Section */}
+      {/* ServiÃ§os Section */}
       <section id="servicos" className="bg-dark-950 py-32 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-xs uppercase tracking-[0.4em] font-bold text-primary-500 mb-4">
-              Nossos Serviços
+              Nossos ServiÃ§os
             </h2>
             <p className="text-4xl font-bold text-white tracking-tight">O que fazemos de melhor.</p>
           </div>
@@ -142,7 +144,7 @@ export default function Home() {
                         </span>
                       )}
                     </div>
-                    <p className="text-dark-400 mt-1 text-sm">{service.duration_minutes} min • Corte com tesoura e máquina</p>
+                    <p className="text-dark-400 mt-1 text-sm">{service.duration_minutes} min â€¢ Corte com tesoura e mÃ¡quina</p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-black text-primary-500">
@@ -204,10 +206,10 @@ export default function Home() {
                 <div className="w-12 h-12 bg-dark-800 rounded-xl overflow-hidden p-1 border border-white/10">
                   <img src="/images/logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <span className="text-white font-bold tracking-tight text-xl">Gimenes Barber Shop</span>
+                <span className="text-white font-bold tracking-tight text-xl">{config.nome_barbearia}</span>
               </div>
               <p className="text-dark-400 leading-relaxed text-sm">
-                A melhor experiência em barbearia da região de José Bonifácio. Tradição, estilo e o melhor atendimento para você.
+                A melhor experiÃªncia em barbearia da regiÃ£o de JosÃ© BonifÃ¡cio. TradiÃ§Ã£o, estilo e o melhor atendimento para vocÃª.
               </p>
             </div>
 
@@ -219,8 +221,8 @@ export default function Home() {
                     <MapPin className="w-5 h-5 text-primary-500" />
                   </div>
                   <p className="text-dark-300 text-sm leading-relaxed">
-                    R. Ademar de Barros, 278<br />
-                    <span className="text-white font-medium">Centro - José Bonifácio/SP</span>
+                    {config.endereco}<br />
+                    <span className="text-white font-medium">Centro - JosÃ© BonifÃ¡cio/SP</span>
                   </p>
                 </div>
                 
@@ -229,7 +231,7 @@ export default function Home() {
                     <Phone className="w-5 h-5 text-primary-500" />
                   </div>
                   <p className="text-dark-300 text-sm leading-relaxed">
-                    (17) 99219-5185<br />
+                    {config.whatsapp}<br />
                     <span className="text-white font-medium">WhatsApp Oficial</span>
                   </p>
                 </div>
@@ -237,15 +239,15 @@ export default function Home() {
             </div>
 
             <div className="space-y-8">
-              <h4 className="text-white font-bold text-lg uppercase tracking-widest">Horários</h4>
+              <h4 className="text-white font-bold text-lg uppercase tracking-widest">HorÃ¡rios</h4>
               <div className="space-y-6">
                 <div className="flex items-center gap-4 group">
                   <div className="w-12 h-12 bg-dark-900 rounded-2xl flex items-center justify-center border border-white/5 group-hover:border-primary-500 transition-colors">
                     <Clock className="w-5 h-5 text-primary-500" />
                   </div>
                   <div className="text-sm">
-                    <p className="text-dark-300 leading-none mb-2 font-medium">Segunda à Sexta</p>
-                    <p className="text-white font-bold text-lg">09h às 20h</p>
+                    <p className="text-dark-300 leading-none mb-2 font-medium">Segunda Ã  Sexta</p>
+                    <p className="text-white font-bold text-lg">09h Ã s 20h</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 group">
@@ -253,8 +255,8 @@ export default function Home() {
                     <Clock className="w-5 h-5 text-primary-500" />
                   </div>
                   <div className="text-sm">
-                    <p className="text-dark-300 leading-none mb-2 font-medium">Sábado</p>
-                    <p className="text-white font-bold text-lg">08h às 18h</p>
+                    <p className="text-dark-300 leading-none mb-2 font-medium">SÃ¡bado</p>
+                    <p className="text-white font-bold text-lg">08h Ã s 18h</p>
                   </div>
                 </div>
               </div>
@@ -263,14 +265,14 @@ export default function Home() {
 
           <div className="mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
             <p className="text-[10px] text-dark-500 uppercase tracking-[0.3em] font-bold">
-              © 2026 Gimenes Barber Shop • Todos os direitos reservados
+              Â© 2026 {config.nome_barbearia} â€¢ Todos os direitos reservados
             </p>
             <div className="flex items-center gap-2">
               <p className="text-[10px] text-dark-500 uppercase tracking-[0.3em] font-bold">Desenvolvido por</p>
-              <span className="text-[10px] text-primary-500 font-black tracking-widest uppercase">Agência FritaKuka</span>
+              <span className="text-[10px] text-primary-500 font-black tracking-widest uppercase">AgÃªncia FritaKuka</span>
             </div>
             <Link to="/admin" className="text-[10px] text-dark-500 hover:text-primary-500 transition-colors uppercase tracking-[0.3em] font-bold">
-              Área do Profissional
+              Ãrea do Profissional
             </Link>
           </div>
         </div>
@@ -278,3 +280,4 @@ export default function Home() {
     </div>
   )
 }
+
