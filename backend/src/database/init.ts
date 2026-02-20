@@ -12,6 +12,12 @@ if (!fs.existsSync(dataDir)) {
 
 const dbPath = path.join(dataDir, 'barbershop.db')
 
+// 🔥 RESET TEMPORÁRIO DO BANCO (REMOVE DEPOIS)
+if (fs.existsSync(dbPath)) {
+  fs.unlinkSync(dbPath)
+  console.log('Old database deleted')
+}
+
 export const db = new Database(dbPath)
 
 export function initDatabase() {
@@ -98,20 +104,9 @@ export function initDatabase() {
       is_open INTEGER DEFAULT 1
     );
 
-    CREATE TABLE IF NOT EXISTS notification_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT NOT NULL,
-      client_id INTEGER,
-      message TEXT NOT NULL,
-      status TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (client_id) REFERENCES clients (id)
-    );
-
     CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date_time);
     CREATE INDEX IF NOT EXISTS idx_appointments_barber ON appointments(barber_id);
     CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
-    CREATE INDEX IF NOT EXISTS idx_notifications_appointment ON notifications(appointment_id);
   `)
 
   applyMigrations()
@@ -137,43 +132,27 @@ function seedDatabase() {
     { name: 'Abner William', whatsapp: '11948379063' }
   ]
 
-  const businessHours = [
-    { day_of_week: 0, open_time: '00:00', close_time: '00:00', is_open: 0 },
-    { day_of_week: 1, open_time: '09:00', close_time: '19:00', is_open: 1 },
-    { day_of_week: 2, open_time: '09:00', close_time: '19:00', is_open: 1 },
-    { day_of_week: 3, open_time: '09:00', close_time: '19:00', is_open: 1 },
-    { day_of_week: 4, open_time: '09:00', close_time: '19:00', is_open: 1 },
-    { day_of_week: 5, open_time: '09:00', close_time: '19:00', is_open: 1 },
-    { day_of_week: 6, open_time: '09:00', close_time: '17:00', is_open: 1 }
-  ]
-
   for (const service of services) {
-    const existing = db.prepare('SELECT id FROM services WHERE name = ?').get(service.name) as { id: number }
-    if (existing) {
-      db.prepare('UPDATE services SET duration_minutes = ?, price = ? WHERE id = ?')
-        .run(service.duration_minutes, service.price, existing.id)
-    } else {
-      db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)')
-        .run(service.name, service.duration_minutes, service.price)
-    }
+    db.prepare(`
+      INSERT INTO services (name, duration_minutes, price)
+      VALUES (?, ?, ?)
+    `).run(service.name, service.duration_minutes, service.price)
   }
 
   for (const barber of barbers) {
-    const existing = db.prepare('SELECT id FROM barbers WHERE name = ?').get(barber.name) as { id: number }
-    if (existing) {
-      db.prepare('UPDATE barbers SET whatsapp = ? WHERE id = ?')
-        .run(barber.whatsapp, existing.id)
-    } else {
-      db.prepare('INSERT INTO barbers (name, whatsapp) VALUES (?, ?)')
-        .run(barber.name, barber.whatsapp)
-    }
+    db.prepare(`
+      INSERT INTO barbers (name, whatsapp)
+      VALUES (?, ?)
+    `).run(barber.name, barber.whatsapp)
   }
 
   const existingAdmin = db.prepare('SELECT id FROM users WHERE username = ?').get('admin')
+
   if (!existingAdmin) {
     const passwordHash = bcrypt.hashSync('*Am.71692432', 10)
-    db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)')
-      .run('admin', passwordHash, 'admin')
-    console.log('Admin user created')
+    db.prepare(`
+      INSERT INTO users (username, password_hash, role)
+      VALUES (?, ?, ?)
+    `).run('admin', passwordHash, 'admin')
   }
 }
