@@ -13,7 +13,7 @@ export interface Appointment {
   date_time: string
   status: 'pendente_pagamento' | 'confirmado' | 'cancelado' | 'no_show' | 'concluido'
   notes?: string
-  reference_images?: string | null
+  reference_images?: string[] | string | null
   client?: Client
   barber?: Barber
   service?: Service
@@ -114,11 +114,16 @@ export const AppointmentModel = {
     dateTime: string
     status?: Appointment['status']
     notes?: string
-    referenceImages?: string | null
+    referenceImages?: string[] | string | null
     tenantId?: number
   }): Appointment => {
     const tenantId = data.tenantId || 1
     const status = data.status || 'pendente_pagamento'
+    let imagesStr = data.referenceImages
+    if (Array.isArray(data.referenceImages)) {
+      imagesStr = JSON.stringify(data.referenceImages)
+    }
+
     const result = db.prepare(`
       INSERT INTO appointments (client_id, barber_id, service_id, date_time, status, notes, reference_images, tenant_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -129,7 +134,7 @@ export const AppointmentModel = {
       data.dateTime,
       status,
       data.notes || null,
-      data.referenceImages || null,
+      imagesStr || null,
       tenantId
     )
     
@@ -172,7 +177,7 @@ function formatAppointmentRow(row: any): Appointment {
     date_time: row.date_time,
     status: row.status,
     notes: row.notes,
-    reference_images: row.reference_images,
+    reference_images: (() => { try { return row.reference_images ? JSON.parse(row.reference_images) : [] } catch { return [] } })(),
     client: row.client_name ? {
       id: row.client_id,
       tenant_id: row.client_tenant_id || row.tenant_id,
@@ -217,4 +222,5 @@ function formatAppointmentRow(row: any): Appointment {
     } as any : undefined
   }
 }
+
 

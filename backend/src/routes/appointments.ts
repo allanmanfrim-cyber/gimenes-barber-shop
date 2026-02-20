@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import { AppointmentModel } from '../models/Appointment.js'
 import { ClientModel } from '../models/Client.js'
 import { ServiceModel } from '../models/Service.js'
@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
 
     if (client.status_multa === 'ativa') {
       return res.status(403).json({ 
-        message: 'Você possui uma multa pendente por falta anterior. Entre em contato com a barbearia para regularizar seu cadastro.' 
+        message: 'VocÃª possui uma multa pendente por falta anterior. Entre em contato com a barbearia para regularizar seu cadastro.' 
       })
     }
 
@@ -141,3 +141,4 @@ router.get('/:id', (req, res) => {
 })
 
 export default router
+

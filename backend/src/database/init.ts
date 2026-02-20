@@ -1,4 +1,4 @@
-﻿import Database from 'better-sqlite3'
+import Database from 'better-sqlite3'
 import path from 'path'
 import bcrypt from 'bcryptjs'
 import fs from 'fs'
@@ -123,17 +123,17 @@ function seedDatabase() {
   const services = [
     { name: 'Corte de Cabelo', duration_minutes: 30, price: 45.00 },
     { name: 'Barba', duration_minutes: 20, price: 30.00 },
-    { name: 'Corte de Cabelo + Barba', duration_minutes: 60, price: 60.00 },
-    { name: 'Corte cabelo + hidrataÃ§Ã£o', duration_minutes: 60, price: 60.00 },
-    { name: 'Corte de Cabelo + Barba + HidrataÃ§Ã£o', duration_minutes: 60, price: 75.00 },
-    { name: 'PÃ©zinho', duration_minutes: 15, price: 15.00 },
+    { name: 'Cabelo + Barba', duration_minutes: 60, price: 60.00 },
+    { name: 'Combo Hidrata��o', duration_minutes: 60, price: 60.00 },
+    { name: 'Cabelo + Barba + Hidratação', duration_minutes: 60, price: 75.00 },
+    { name: 'Pézinho', duration_minutes: 15, price: 15.00 },
     { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },
-    { name: 'SÃ³ HidrataÃ§Ã£o', duration_minutes: 30, price: 25.00 }
+    { name: 'Só Hidratação', duration_minutes: 30, price: 25.00 }
   ]
 
   const barbers = [
     { name: 'Juninho', whatsapp: '17992195185' },
-    { name: 'JÃºnior Gimenes', whatsapp: '17992195185' },
+    { name: 'J�nior Gimenes', whatsapp: '17992195185' },
     { name: 'Abner William', whatsapp: '11948379063' }
   ]
 
@@ -200,8 +200,8 @@ function seedDatabase() {
       whatsapp, telefone, instagram, endereco, horario_funcionamento
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       "default", "Gimenes Barber Shop", "/images/logo.png", "#eab308", "#171717", "#0a0a0a",
-      "17992195185", "17992195185", "gimenes_barber", "R. Ademar de Barros, 278, Centro - José Bonifácio/SP",
-      "Seg-Sex: 09h às 20h, Sáb: 08h às 18h"
+      "17992195185", "17992195185", "gimenes_barber", "R. Ademar de Barros, 278, Centro - Jos� Bonif�cio/SP",
+      "Seg-Sex: 09h �s 20h, S�b: 08h �s 18h"
     )
     console.log("Seed: Default tenant config created")
   }
@@ -214,5 +214,7 @@ function seedDatabase() {
     console.log('Admin user created: admin / admin123')
   }
 }
+
+
 
 

@@ -6,6 +6,7 @@ import { ServiceSelect } from '../components/booking/ServiceSelect'
 import { BarberSelect } from '../components/booking/BarberSelect'
 import { DateTimeSelect } from '../components/booking/DateTimeSelect'
 import { ClientForm } from '../components/booking/ClientForm'
+import { ReferenceImageUpload } from '../components/booking/ReferenceImageUpload'
 import { PaymentSelect } from '../components/booking/PaymentSelect'
 import { Confirmation } from '../components/booking/Confirmation'
 import { BookingStepper } from '../components/booking/BookingStepper'
@@ -99,7 +100,10 @@ export default function Booking() {
           {stepTitles[step - 1]}
         </h2>
         
-        <BookingStepper currentStep={step} totalSteps={6} />
+        <BookingStepper 
+          currentStep={step === 4.5 ? 5 : step >= 5 ? (step === 5 ? 6 : 7) : step} 
+          totalSteps={7} 
+        />
       </div>
 
       {error && (
@@ -166,6 +170,9 @@ export default function Booking() {
     </Layout>
   )
 }
+
+
+
 
 
 

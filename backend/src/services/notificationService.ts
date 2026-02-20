@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+﻿import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Appointment } from '../models/Appointment.js'
 import { NotificationModel } from '../models/Notification.js'
@@ -27,7 +27,7 @@ function formatDateTime(dateTime: string): { date: string; time: string } {
 
 export async function notifyAppointmentConfirmed(appointment: Appointment): Promise<void> {
   const { date, time } = formatDateTime(appointment.date_time)
-  const paymentStatus = getPaymentStatusText(appointment.payment?.status || 'pending')
+  const paymentStatus = getPaymentStatusText(appointment)
   
   if (appointment.client?.whatsapp) {
     const alreadySent = NotificationModel.exists(
@@ -377,3 +377,4 @@ export async function retryNotification(notificationId: number): Promise<boolean
 
   return false
 }
+
