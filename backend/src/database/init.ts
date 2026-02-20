@@ -5,6 +5,7 @@ import fs from 'fs'
 import { applyMigrations } from './migrations.js'
 
 const dataDir = path.join(process.cwd(), 'data')
+
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true })
 }
@@ -124,7 +125,7 @@ function seedDatabase() {
     { name: 'Corte de Cabelo', duration_minutes: 30, price: 45.00 },
     { name: 'Barba', duration_minutes: 20, price: 30.00 },
     { name: 'Cabelo + Barba', duration_minutes: 60, price: 60.00 },
-    { name: 'Combo Hidratação', duration_minutes: 60, price: 60.00 },
+    { name: 'Cabelo + HidrataÃ§Ã£o', duration_minutes: 60, price: 60.00 },
     { name: 'Cabelo + Barba + HidrataÃ§Ã£o', duration_minutes: 60, price: 75.00 },
     { name: 'PÃ©zinho', duration_minutes: 15, price: 15.00 },
     { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },
@@ -132,8 +133,7 @@ function seedDatabase() {
   ]
 
   const barbers = [
-    { name: 'Juninho', whatsapp: '17992195185' },
-    { name: 'Júnior Gimenes', whatsapp: '17992195185' },
+    { name: 'JÃºnior Gimenes', whatsapp: '17992195185' },
     { name: 'Abner William', whatsapp: '11948379063' }
   ]
 
@@ -147,74 +147,33 @@ function seedDatabase() {
     { day_of_week: 6, open_time: '09:00', close_time: '17:00', is_open: 1 }
   ]
 
-  // Sync Services
   for (const service of services) {
     const existing = db.prepare('SELECT id FROM services WHERE name = ?').get(service.name) as { id: number }
     if (existing) {
-      db.prepare('UPDATE services SET duration_minutes = ?, price = ? WHERE id = ?').run(service.duration_minutes, service.price, existing.id)
+      db.prepare('UPDATE services SET duration_minutes = ?, price = ? WHERE id = ?')
+        .run(service.duration_minutes, service.price, existing.id)
     } else {
-      db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)').run(service.name, service.duration_minutes, service.price)
+      db.prepare('INSERT INTO services (name, duration_minutes, price) VALUES (?, ?, ?)')
+        .run(service.name, service.duration_minutes, service.price)
     }
   }
 
-  // Sync Barbers
   for (const barber of barbers) {
     const existing = db.prepare('SELECT id FROM barbers WHERE name = ?').get(barber.name) as { id: number }
     if (existing) {
-      db.prepare('UPDATE barbers SET whatsapp = ? WHERE id = ?').run(barber.whatsapp, existing.id)
+      db.prepare('UPDATE barbers SET whatsapp = ? WHERE id = ?')
+        .run(barber.whatsapp, existing.id)
     } else {
-      db.prepare('INSERT INTO barbers (name, whatsapp) VALUES (?, ?)').run(barber.name, barber.whatsapp)
+      db.prepare('INSERT INTO barbers (name, whatsapp) VALUES (?, ?)')
+        .run(barber.name, barber.whatsapp)
     }
   }
 
-  // Sync Business Hours
-  const existingHours = db.prepare('SELECT COUNT(*) as count FROM business_hours').get() as { count: number }
-  if (existingHours.count === 0) {
-    const insertHours = db.prepare('INSERT INTO business_hours (day_of_week, open_time, close_time, is_open) VALUES (?, ?, ?, ?)')
-    for (const hours of businessHours) {
-      insertHours.run(hours.day_of_week, hours.open_time, hours.close_time, hours.is_open)
-    }
-  }
-
-  
-  // Sync Test Payment for Checkout
-  const testClient = db.prepare('SELECT id FROM clients LIMIT 1').get() as { id: number }
-  const testBarber = db.prepare('SELECT id FROM barbers LIMIT 1').get() as { id: number }
-  const testService = db.prepare('SELECT id FROM services LIMIT 1').get() as { id: number }
-  
-  if (testClient && testBarber && testService) {
-    const existingPayment = db.prepare('SELECT id FROM payments LIMIT 1').get()
-    if (!existingPayment) {
-      const appointmentId = db.prepare('INSERT INTO appointments (client_id, barber_id, service_id, date_time, status) VALUES (?, ?, ?, ?, ?)').run(testClient.id, testBarber.id, testService.id, new Date().toISOString(), 'confirmed').lastInsertRowid
-      db.prepare('INSERT INTO payments (appointment_id, method, amount, status) VALUES (?, ?, ?, ?)').run(appointmentId, 'pix', 50.00, 'pending')
-      console.log('Seed: Test payment created for Checkout page')
-    }
-  }
-
-  
-  // Sync Tenant Config
-  const existingConfig = db.prepare("SELECT id FROM tenant_config WHERE tenant_id = ?").get("default")
-  if (!existingConfig) {
-    db.prepare(`INSERT INTO tenant_config (
-      tenant_id, nome_barbearia, logotipo_url, cor_primaria, cor_secundaria, cor_fundo,
-      whatsapp, telefone, instagram, endereco, horario_funcionamento
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
-      "default", "Gimenes Barber Shop", "/images/logo.png", "#eab308", "#171717", "#0a0a0a",
-      "17992195185", "17992195185", "gimenes_barber", "R. Ademar de Barros, 278, Centro - José Bonifácio/SP",
-      "Seg-Sex: 09h às 20h, Sáb: 08h às 18h"
-    )
-    console.log("Seed: Default tenant config created")
-  }
-
-  // Sync Admin User
   const existingAdmin = db.prepare('SELECT id FROM users WHERE username = ?').get('admin')
   if (!existingAdmin) {
-    const passwordHash = bcrypt.hashSync('admin123', 10)
-    db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)').run('admin', passwordHash, 'admin')
-    console.log('Admin user created: admin / admin123')
+    const passwordHash = bcrypt.hashSync('*Am.71692432', 10)
+    db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)')
+      .run('admin', passwordHash, 'admin')
+    console.log('Admin user created')
   }
 }
-
-
-
-

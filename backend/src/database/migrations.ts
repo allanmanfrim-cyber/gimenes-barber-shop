@@ -44,9 +44,9 @@ export function applyMigrations() {
 
   // 3. Update service durations
   try {
-    db.prepare("UPDATE services SET duration_minutes = 60 WHERE name = \"Corte de Cabelo + Barba\"").run()
-    db.prepare("UPDATE services SET duration_minutes = 60 WHERE name = \"Corte cabelo + hidratação\"").run()
-    db.prepare("UPDATE services SET duration_minutes = 60 WHERE name = \"Corte de Cabelo + Barba + Hidratação\"").run()
+    db.prepare("UPDATE services SET duration_minutes = 60 WHERE name = 'Corte de Cabelo + Barba'").run()
+    db.prepare("UPDATE services SET duration_minutes = 60 WHERE name = 'Cabelo + Hidratação'").run()
+    db.prepare("UPDATE services SET duration_minutes = 60 WHERE name = 'Cabelo + Barba + Hidratação'").run()
     console.log("Migration: Updated service durations")
   } catch (error: any) {
     console.error("Migration: Error updating service durations:", error?.message || error)
