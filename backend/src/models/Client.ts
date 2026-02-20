@@ -1,7 +1,8 @@
-import { db } from '../database/init.js'
+﻿import { db } from '../database/init.js'
 
 export interface Client {
   id: number
+  tenant_id: number
   name: string
   whatsapp: string
   email: string | null
@@ -108,3 +109,4 @@ export const ClientModel = {
     `).all(`${month}-${day}`) as Client[]
   }
 }
+

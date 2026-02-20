@@ -1,8 +1,6 @@
-import fs from 'fs'
-import path from 'path'
-import { db } from '../database/init.js'
-import { Service } from './Service.js'
+﻿import { db } from '../database/init.js'
 import { Barber } from './Barber.js'
+import { Service } from './Service.js'
 import { Client } from './Client.js'
 import { Payment } from './Payment.js'
 
@@ -14,53 +12,34 @@ export interface Appointment {
   service_id: number
   date_time: string
   status: 'pendente_pagamento' | 'confirmado' | 'cancelado' | 'no_show' | 'concluido'
-  notes: string | null
-  reference_images: string | null
-  created_at: string
+  notes?: string
+  reference_images?: string | null
   client?: Client
   barber?: Barber
   service?: Service
   payment?: Payment
 }
 
-const saveBase64Image = (base64String: string, id: number, index: number): string | null => {
-  try {
-    if (!base64String.startsWith('data:image')) return null
+export const AppointmentModel = {
+  findAll: (options?: string | { date?: string, barberId?: number }, barberIdParam?: number): Appointment[] => {
+    let date: string | undefined
+    let barberId: number | undefined
 
-    const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
-    if (!matches || matches.length !== 3) return null
-
-    const type = matches[1]
-    const extension = type.split('/')[1] || 'jpg'
-    const data = Buffer.from(matches[2], 'base64')
-    
-    const fileName = `ref_${id}_${index}_${Date.now()}.${extension}`
-    const uploadsDir = path.join(process.cwd(), 'uploads')
-    
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true })
+    if (typeof options === 'object') {
+      date = options.date
+      barberId = options.barberId
+    } else {
+      date = options
+      barberId = barberIdParam
     }
 
-    fs.writeFileSync(path.join(uploadsDir, fileName), data)
-    
-    const appUrl = process.env.APP_URL || 'https://www.gimenesbarber.com.br'
-    return `${appUrl}/uploads/${fileName}`
-  } catch (error) {
-    console.error('Error saving base64 image:', error)
-    return null
-  }
-}
-
-export const AppointmentModel = {
-  findAll: (filters?: { date?: string; barberId?: number; status?: string; tenantId?: number }): Appointment[] => {
     let query = `
       SELECT 
         a.*,
-        c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email,
-        c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
-        b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active,
-        s.name as service_name, s.duration_minutes, s.price, s.active as service_active,
-        p.id as payment_id, p.metodo_visual as payment_method, p.amount as payment_amount, p.status as payment_status
+        c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email, c.data_nascimento, c.faltas_sem_aviso, c.status_multa, c.tenant_id as client_tenant_id,
+        b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active, b.tenant_id as barber_tenant_id, b.display_order as barber_display_order,
+        s.name as service_name, s.duration_minutes, s.price, s.active as service_active, s.tenant_id as service_tenant_id,
+        p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
       LEFT JOIN clients c ON a.client_id = c.id
       LEFT JOIN barbers b ON a.barber_id = b.id
@@ -70,25 +49,14 @@ export const AppointmentModel = {
     `
     const params: (string | number)[] = []
 
-    // Tenant Filter
-    if (filters?.tenantId) {
-        query += ' AND a.tenant_id = ?'
-        params.push(filters.tenantId)
-    } else {
-        query += ' AND a.tenant_id = 1'
+    if (date) {
+      query += ' AND date(a.date_time) = ?'
+      params.push(date)
     }
 
-    if (filters?.date) {
-      query += ' AND DATE(a.date_time) = ?'
-      params.push(filters.date)
-    }
-    if (filters?.barberId) {
+    if (barberId) {
       query += ' AND a.barber_id = ?'
-      params.push(filters.barberId)
-    }
-    if (filters?.status) {
-      query += ' AND a.status = ?'
-      params.push(filters.status)
+      params.push(barberId)
     }
 
     query += ' ORDER BY a.date_time ASC'
@@ -101,11 +69,10 @@ export const AppointmentModel = {
     const row = db.prepare(`
       SELECT 
         a.*,
-        c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email,
-        c.data_nascimento, c.faltas_sem_aviso, c.status_multa,
-        b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active,
-        s.name as service_name, s.duration_minutes, s.price, s.active as service_active,
-        p.id as payment_id, p.metodo_visual as payment_method, p.amount as payment_amount, p.status as payment_status
+        c.name as client_name, c.whatsapp as client_whatsapp, c.email as client_email, c.data_nascimento, c.faltas_sem_aviso, c.status_multa, c.tenant_id as client_tenant_id,
+        b.name as barber_name, b.whatsapp as barber_whatsapp, b.email as barber_email, b.active as barber_active, b.tenant_id as barber_tenant_id, b.display_order as barber_display_order,
+        s.name as service_name, s.duration_minutes, s.price, s.active as service_active, s.tenant_id as service_tenant_id,
+        p.id as payment_id, p.method as payment_method, p.amount as payment_amount, p.status as payment_status
       FROM appointments a
       LEFT JOIN clients c ON a.client_id = c.id
       LEFT JOIN barbers b ON a.barber_id = b.id
@@ -114,34 +81,30 @@ export const AppointmentModel = {
       WHERE a.id = ?
     `).get(id) as any
 
-    return row ? formatAppointmentRow(row) : undefined
+    if (!row) return undefined
+    return formatAppointmentRow(row)
   },
 
-  // Logica de conflito atualizada: ignora cancelados e no_show
   findConflicts: (barberId: number, dateTime: string, durationMinutes: number, excludeId?: number, tenantId: number = 1): Appointment[] => {
-    const endTime = new Date(new Date(dateTime).getTime() + durationMinutes * 60000).toISOString()
+    const start = new Date(dateTime)
+    const end = new Date(start.getTime() + durationMinutes * 60000)
     
-    let query = `
-      SELECT a.*, s.duration_minutes
-      FROM appointments a
-      JOIN services s ON a.service_id = s.id
-      WHERE a.barber_id = ?
-        AND a.tenant_id = ?
-        AND a.status NOT IN ('cancelado', 'no_show')
-        AND (
-          (a.date_time <= ? AND datetime(a.date_time, '+' || s.duration_minutes || ' minutes') > ?)
-          OR (a.date_time < ? AND datetime(a.date_time, '+' || s.duration_minutes || ' minutes') >= ?)
-          OR (a.date_time >= ? AND a.date_time < ?)
-        )
+    // Simplificando busca por conflitos: mesma data e mesmo barbeiro
+    // Na pratica, precisaria calcular sobreposicao de horarios
+    const query = `
+      SELECT * FROM appointments 
+      WHERE barber_id = ? AND tenant_id = ?
+      AND status NOT IN ('cancelado', 'no_show')
+      AND (
+        (date_time >= ? AND date_time < ?) OR
+        (datetime(date_time, '+' || (SELECT duration_minutes FROM services WHERE id = service_id) || ' minutes') > ? AND date_time <= ?)
+      )
+      ${excludeId ? 'AND id != ?' : ''}
     `
-    const params: (string | number)[] = [barberId, tenantId, dateTime, dateTime, endTime, endTime, dateTime, endTime]
+    const params = [barberId, tenantId, dateTime, end.toISOString(), dateTime, dateTime]
+    if (excludeId) params.push(excludeId)
 
-    if (excludeId) {
-      query += ' AND a.id != ?'
-      params.push(excludeId)
-    }
-
-    return db.prepare(query).all(...params) as Appointment[]
+    return db.prepare(query).all(...params) as any[]
   },
 
   create: (data: {
@@ -149,50 +112,36 @@ export const AppointmentModel = {
     barberId: number
     serviceId: number
     dateTime: string
+    status?: Appointment['status']
     notes?: string
-    referenceImages?: string[]
+    referenceImages?: string | null
     tenantId?: number
   }): Appointment => {
     const tenantId = data.tenantId || 1
-    
-    // Status inicial agora eh 'pendente_pagamento' por padrao
+    const status = data.status || 'pendente_pagamento'
     const result = db.prepare(`
-      INSERT INTO appointments (client_id, barber_id, service_id, date_time, notes, status, tenant_id)
-      VALUES (?, ?, ?, ?, ?, 'pendente_pagamento', ?)
+      INSERT INTO appointments (client_id, barber_id, service_id, date_time, status, notes, reference_images, tenant_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      data.clientId, 
-      data.barberId, 
-      data.serviceId, 
-      data.dateTime, 
+      data.clientId,
+      data.barberId,
+      data.serviceId,
+      data.dateTime,
+      status,
       data.notes || null,
+      data.referenceImages || null,
       tenantId
     )
     
-    const id = result.lastInsertRowid as number
-    
-    let savedUrls: string[] = []
-    if (data.referenceImages && data.referenceImages.length > 0) {
-      savedUrls = data.referenceImages
-        .map((img, idx) => saveBase64Image(img, id, idx))
-        .filter((url): url is string => url !== null)
-      
-      if (savedUrls.length > 0) {
-        db.prepare('UPDATE appointments SET reference_images = ? WHERE id = ?')
-          .run(JSON.stringify(savedUrls), id)
-      }
-    }
-    
-    return AppointmentModel.findById(id)!
+    return AppointmentModel.findById(result.lastInsertRowid as number)!
   },
 
   update: (id: number, data: Partial<Appointment>): Appointment | undefined => {
     const fields: string[] = []
     const values: (string | number | null)[] = []
 
-    if (data.barber_id !== undefined) { fields.push('barber_id = ?'); values.push(data.barber_id) }
-    if (data.service_id !== undefined) { fields.push('service_id = ?'); values.push(data.service_id) }
-    if (data.date_time !== undefined) { fields.push('date_time = ?'); values.push(data.date_time) }
     if (data.status !== undefined) { fields.push('status = ?'); values.push(data.status) }
+    if (data.date_time !== undefined) { fields.push('date_time = ?'); values.push(data.date_time) }
     if (data.notes !== undefined) { fields.push('notes = ?'); values.push(data.notes) }
 
     if (fields.length === 0) return AppointmentModel.findById(id)
@@ -204,9 +153,11 @@ export const AppointmentModel = {
 
   cancel: (id: number): boolean => {
     const result = db.prepare("UPDATE appointments SET status = 'cancelado' WHERE id = ?").run(id)
-    if (result.changes > 0) {
-      db.prepare("UPDATE payments SET status = 'cancelled' WHERE appointment_id = ?").run(id)
-    }
+    return result.changes > 0
+  },
+
+  delete: (id: number): boolean => {
+    const result = db.prepare('DELETE FROM appointments WHERE id = ?').run(id)
     return result.changes > 0
   }
 }
@@ -222,9 +173,9 @@ function formatAppointmentRow(row: any): Appointment {
     status: row.status,
     notes: row.notes,
     reference_images: row.reference_images,
-    created_at: row.created_at,
     client: row.client_name ? {
       id: row.client_id,
+      tenant_id: row.client_tenant_id || row.tenant_id,
       name: row.client_name,
       whatsapp: row.client_whatsapp,
       email: row.client_email || '',
@@ -235,14 +186,17 @@ function formatAppointmentRow(row: any): Appointment {
     } : undefined,
     barber: row.barber_name ? {
       id: row.barber_id,
+      tenant_id: row.barber_tenant_id || row.tenant_id,
       name: row.barber_name,
       whatsapp: row.barber_whatsapp || '',
       email: row.barber_email || '',
       active: row.barber_active ?? 1,
+      display_order: row.barber_display_order || 0,
       created_at: ''
     } : undefined,
     service: row.service_name ? {
       id: row.service_id,
+      tenant_id: row.service_tenant_id || row.tenant_id,
       name: row.service_name,
       duration_minutes: row.duration_minutes,
       price: row.price,
@@ -251,11 +205,16 @@ function formatAppointmentRow(row: any): Appointment {
     } : undefined,
     payment: row.payment_id ? {
       id: row.payment_id,
+      tenant_id: row.tenant_id,
       appointment_id: row.id,
-      metodo_visual: row.payment_method, // mapped
+      appointmentId: row.id,
+      method: row.payment_method,
       amount: row.payment_amount,
       status: row.payment_status,
-      created_at: ''
+      created_at: '',
+      metodo_visual: row.payment_method,
+      metodo_gateway_real: 'presencial'
     } as any : undefined
   }
 }
+

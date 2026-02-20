@@ -1,4 +1,4 @@
-import { db } from '../database/init.js'
+﻿import { db } from '../database/init.js'
 
 export interface Barber {
   id: number
@@ -27,8 +27,8 @@ export const BarberModel = {
     return db.prepare('SELECT * FROM barbers WHERE id = ?').get(id) as Barber | undefined
   },
 
-  create: (name: string, whatsapp?: string): Barber => {
-    const result = db.prepare('INSERT INTO barbers (name, whatsapp, tenant_id) VALUES (?, ?, 1)').run(name, whatsapp || null)
+  create: (name: string, whatsapp?: string, email?: string): Barber => {
+    const result = db.prepare('INSERT INTO barbers (name, whatsapp, email, tenant_id) VALUES (?, ?, ?, 1)').run(name, whatsapp || null, email || null)
     return BarberModel.findById(result.lastInsertRowid as number)!
   },
 
@@ -38,6 +38,7 @@ export const BarberModel = {
 
     if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name) }
     if (data.whatsapp !== undefined) { fields.push('whatsapp = ?'); values.push(data.whatsapp) }
+    if (data.email !== undefined) { fields.push('email = ?'); values.push(data.email) }
     if (data.active !== undefined) { fields.push('active = ?'); values.push(data.active) }
     if (data.display_order !== undefined) { fields.push('display_order = ?'); values.push(data.display_order) }
 

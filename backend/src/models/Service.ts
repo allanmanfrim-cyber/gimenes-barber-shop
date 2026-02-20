@@ -1,7 +1,8 @@
-import { db } from '../database/init.js'
+﻿import { db } from '../database/init.js'
 
 export interface Service {
   id: number
+  tenant_id: number
   name: string
   duration_minutes: number
   price: number
@@ -49,3 +50,4 @@ export const ServiceModel = {
     return result.changes > 0
   }
 }
+

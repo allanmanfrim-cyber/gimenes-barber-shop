@@ -1,5 +1,4 @@
-﻿import configRoutes from './routes/config.js'
-import 'dotenv/config'
+﻿import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
@@ -81,4 +80,5 @@ const portNumber = Number(PORT)
 app.listen(portNumber, '0.0.0.0', () => {
   console.log(`Server listening on port ${portNumber}`)
 })
+
 
