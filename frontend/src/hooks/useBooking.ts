@@ -26,12 +26,7 @@ export function useBooking() {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [appointmentResult, setAppointmentResult] = useState<{
-    appointment: any
-    pixCode?: string
-    pixQrCodeBase64?: string
-    checkoutUrl?: string
-  } | null>(null)
+  const [appointmentResult, setAppointmentResult] = useState<any>(null)
 
   const loadServices = useCallback(async () => {
     setLoading(true)
@@ -39,7 +34,7 @@ export function useBooking() {
       const { services } = await api.services.list()
       setServices(services.filter(s => s.active))
     } catch {
-      setError('Erro ao carregar serviÃ§os')
+      setError('Erro ao carregar serviços')
     } finally {
       setLoading(false)
     }
@@ -66,7 +61,7 @@ export function useBooking() {
       setTimeSlots(slots)
       setBookingData(prev => ({ ...prev, date: dateStr }))
     } catch {
-      setError('Erro ao carregar horÃ¡rios')
+      setError('Erro ao carregar horários')
     } finally {
       setLoading(false)
     }
@@ -87,42 +82,23 @@ export function useBooking() {
     setStep(4)
   }
 
+  // 🔥 CORRIGIDO AQUI
   const setClientInfo = (name: string, whatsapp: string, email: string, birthDate: string, notes: string) => {
-    setBookingData(prev => ({ 
-      ...prev, 
-      clientName: name, 
+    setBookingData(prev => ({
+      ...prev,
+      clientName: name,
       clientWhatsapp: whatsapp,
       clientEmail: email,
       clientBirthDate: birthDate,
-      notes 
+      notes
     }))
-  }
 
-  const setReferenceImages = (images: string[]) => {
-    setBookingData(prev => ({ ...prev, referenceImages: images }))
-  }
-
-  const confirmClientInfo = () => {
-    // Verificar se o serviÃ§o selecionado requer fotos de referÃªncia
-    const serviceName = bookingData.service?.name.toLowerCase() || ''
-    const requiresPhotos = serviceName.includes('corte') || 
-                           serviceName.includes('combo') ||
-                           serviceName.includes('hidrataÃ§Ã£o')
-    
-    if (requiresPhotos) {
-      setStep(4.5)
-    } else {
-      setStep(5)
-    }
-  }
-
-  const goToPayment = () => {
     setStep(5)
   }
 
   const setPaymentMethod = (method: PaymentMethod, type?: PaymentType) => {
-    setBookingData(prev => ({ 
-      ...prev, 
+    setBookingData(prev => ({
+      ...prev,
       paymentMethod: method,
       ...(type !== undefined && { paymentType: type })
     }))
@@ -140,13 +116,6 @@ export function useBooking() {
     try {
       const dateTime = `${bookingData.date}T${bookingData.time}:00`
 
-      let apiMethod: string = bookingData.paymentMethod
-      if (bookingData.paymentType === 'presencial') {
-        apiMethod = 'cash'
-      } else if (bookingData.paymentMethod === 'nubank') {
-        apiMethod = 'pix'
-      }
-
       const result = await api.appointments.create({
         serviceId: bookingData.service.id,
         barberId: bookingData.barber?.id || 'any',
@@ -157,21 +126,11 @@ export function useBooking() {
         clientBirthDate: bookingData.clientBirthDate,
         notes: bookingData.notes,
         referenceImages: bookingData.referenceImages,
-        paymentMethod: apiMethod as PaymentMethod
+        paymentMethod: bookingData.paymentMethod
       })
-      setAppointmentResult(result)
 
-      if (bookingData.paymentType === 'presencial') {
-        setStep(9)
-      } else if (bookingData.paymentMethod === 'pix') {
-        setStep(6)
-      } else if (bookingData.paymentMethod === 'nubank') {
-        setStep(7)
-      } else if (bookingData.paymentMethod === 'credit_card') {
-        setStep(8)
-      } else {
-        setStep(9)
-      }
+      setAppointmentResult(result)
+      setStep(6)
 
       return true
     } catch (err) {
@@ -182,24 +141,8 @@ export function useBooking() {
     }
   }
 
-  const goToConfirmation = () => {
-    setStep(9)
-  }
-
   const goBack = () => {
-    if (step === 5) {
-      const requiresPhotos = bookingData.service?.name.includes('Corte de Cabelo') || 
-                             bookingData.service?.name.includes('Corte + Barba')
-      if (requiresPhotos) {
-        setStep(4.5)
-      } else {
-        setStep(4)
-      }
-    } else if (step === 4.5) {
-      setStep(4)
-    } else if (step > 1) {
-      setStep(step - 1)
-    }
+    if (step > 1) setStep(step - 1)
   }
 
   const reset = () => {
@@ -225,19 +168,9 @@ export function useBooking() {
     selectBarber,
     selectDateTime,
     setClientInfo,
-    confirmClientInfo,
-    setReferenceImages,
     setPaymentMethod,
     submitBooking,
-    goToPayment,
-    goToConfirmation,
     goBack,
     reset
   }
 }
-
-
-
-
-
-
