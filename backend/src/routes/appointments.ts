@@ -1,144 +1,190 @@
-﻿import { Router } from 'express'
-import { AppointmentModel } from '../models/Appointment.js'
-import { ClientModel } from '../models/Client.js'
-import { ServiceModel } from '../models/Service.js'
-import { PaymentModel, PaymentMethod } from '../models/Payment.js'
-import { findAvailableBarber } from '../utils/timeSlots.js'
-import { MercadoPagoService } from '../services/mercadoPagoService.js'
-import { notifyAppointmentConfirmed } from '../services/notificationService.js'
-import { WhatsAppService } from '../services/whatsappService.js'
+﻿import { db } from '../database/init.js'
+import { Barber } from './Barber.js'
+import { Service } from './Service.js'
+import { Client } from './Client.js'
+import { Payment } from './Payment.js'
 
-const router = Router()
+export interface Appointment {
+  id: number
+  tenant_id: number
+  client_id: number
+  barber_id: number
+  service_id: number
+  date_time: string
+  status: 'pendente_pagamento' | 'confirmado' | 'cancelado' | 'no_show' | 'concluido'
+  notes?: string
+  reference_images?: string[] | string | null
+  client?: Client
+  barber?: Barber
+  service?: Service
+  payment?: Payment
+}
 
-router.post('/', async (req, res) => {
-  try {
-    const { 
-      serviceId, 
-      barberId, 
-      dateTime, 
-      clientName, 
-      clientWhatsapp, 
-      clientEmail,
-      clientBirthDate, 
-      notes, 
-      referenceImages, 
-      paymentMethod 
-    } = req.body
+export const AppointmentModel = {
 
-    if (!serviceId || !dateTime || !clientName || !clientWhatsapp || !paymentMethod) {
-      return res.status(400).json({ message: 'Dados incompletos' })
+  findAll: (options?: { date?: string; barberId?: number }): Appointment[] => {
+    let query = `
+      SELECT 
+        a.*,
+        p.id as payment_id,
+        p.method as payment_method,
+        p.amount as payment_amount,
+        p.status as payment_status
+      FROM appointments a
+      LEFT JOIN payments p ON a.id = p.appointment_id
+      WHERE 1=1
+    `
+    const params: any[] = []
+
+    if (options?.date) {
+      query += ' AND date(a.date_time) = ?'
+      params.push(options.date)
     }
 
-    const service = ServiceModel.findById(serviceId)
-    if (!service) {
-      return res.status(404).json({ message: 'Servico nao encontrado' })
+    if (options?.barberId) {
+      query += ' AND a.barber_id = ?'
+      params.push(options.barberId)
     }
 
-    let finalBarberId: number
-    const [date, time] = dateTime.split('T')
-    const timeOnly = time.substring(0, 5)
+    query += ' ORDER BY a.date_time ASC'
 
-    if (barberId === 'any') {
-      const availableBarber = findAvailableBarber(date, timeOnly, service.duration_minutes)
-      if (!availableBarber) {
-        return res.status(400).json({ message: 'Nenhum barbeiro disponivel neste horario' })
-      }
-      finalBarberId = availableBarber
-    } else {
-      const conflicts = AppointmentModel.findConflicts(barberId, dateTime, service.duration_minutes)
-      if (conflicts.length > 0) {
-        return res.status(400).json({ message: 'Horario indisponivel para este barbeiro' })
-      }
-      finalBarberId = barberId
-    }
+    return db.prepare(query).all(...params)
+  },
 
-    const client = ClientModel.findOrCreate(clientName, clientWhatsapp, clientEmail, clientBirthDate)
+  findById: (id: number): Appointment | undefined => {
+    return db.prepare(`
+      SELECT 
+        a.*,
+        p.id as payment_id,
+        p.method as payment_method,
+        p.amount as payment_amount,
+        p.status as payment_status
+      FROM appointments a
+      LEFT JOIN payments p ON a.id = p.appointment_id
+      WHERE a.id = ?
+    `).get(id)
+  },
 
-    if (client.status_multa === 'ativa') {
-      return res.status(403).json({ 
-        message: 'VocÃª possui uma multa pendente por falta anterior. Entre em contato com a barbearia para regularizar seu cadastro.' 
-      })
-    }
+  findConflicts: (
+    barberId: number,
+    dateTime: string,
+    durationMinutes: number,
+    excludeId?: number,
+    tenantId: number = 1
+  ): Appointment[] => {
 
-    const appointment = AppointmentModel.create({
-      clientId: client.id,
-      barberId: finalBarberId,
-      serviceId,
+    const start = new Date(dateTime)
+    const end = new Date(start.getTime() + durationMinutes * 60000)
+
+    let query = `
+      SELECT *
+      FROM appointments
+      WHERE barber_id = ?
+        AND tenant_id = ?
+        AND status NOT IN ('cancelado', 'no_show')
+        AND (
+          (date_time >= ? AND date_time < ?)
+          OR
+          (datetime(date_time, '+' || ? || ' minutes') > ? AND date_time <= ?)
+        )
+    `
+
+    const params: any[] = [
+      barberId,
+      tenantId,
       dateTime,
-      notes,
-      referenceImages
-    })
+      end.toISOString(),
+      durationMinutes,
+      dateTime,
+      dateTime
+    ]
 
-    let pixCode: string | undefined
-    let pixQrCodeBase64: string | undefined
-    let checkoutUrl: string | undefined
-    let externalReference: string | undefined
-
-    const method = paymentMethod as PaymentMethod
-    const isPresencial = method === 'local' || method === 'machine' || method === 'cash'
-
-    if (method === 'pix' || method === 'nubank') {
-      const pixResult = await MercadoPagoService.createPixPayment(
-        service.price, 
-        appointment.id, 
-        clientEmail || 'cliente@exemplo.com'
-      )
-      pixCode = pixResult.qrCode
-      pixQrCodeBase64 = pixResult.qrCodeBase64
-      externalReference = pixResult.externalReference
-    } else if (method === 'card') {
-      const cardResult = await MercadoPagoService.createCardCheckout(
-        service.price,
-        appointment.id,
-        service.name,
-        clientEmail || 'cliente@exemplo.com'
-      )
-      checkoutUrl = cardResult.initPoint
-      externalReference = cardResult.externalReference
+    if (excludeId) {
+      query += ' AND id != ?'
+      params.push(excludeId)
     }
 
-    PaymentModel.create({
-      appointmentId: appointment.id,
-      method,
-      amount: service.price,
-      pixCode,
-      externalReference
-    })
+    return db.prepare(query).all(...params)
+  },
 
-    const fullAppointment = AppointmentModel.findById(appointment.id)
+  create: (data: {
+    clientId: number
+    barberId: number
+    serviceId: number
+    dateTime: string
+    status?: Appointment['status']
+    notes?: string
+    referenceImages?: string[] | string | null
+    tenantId?: number
+  }): Appointment => {
 
-    // Envia confirmacoes
-    if (fullAppointment) {
-      if (isPresencial) {
-        await notifyAppointmentConfirmed(fullAppointment)
-      }
-      // Sempre tenta enviar WhatsApp (mesmo se pendente de pagamento online)
-      await WhatsAppService.sendConfirmation(appointment.id)
+    const result = db.prepare(`
+      INSERT INTO appointments 
+      (client_id, barber_id, service_id, date_time, status, notes, reference_images, tenant_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      data.clientId,
+      data.barberId,
+      data.serviceId,
+      data.dateTime,
+      data.status || 'pendente_pagamento',
+      data.notes || null,
+      data.referenceImages || null,
+      data.tenantId || 1
+    )
+
+    return AppointmentModel.findById(result.lastInsertRowid as number)!
+  },
+
+  update: (id: number, data: Partial<Appointment>): Appointment | undefined => {
+
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (data.status !== undefined) {
+      fields.push('status = ?')
+      values.push(data.status)
     }
 
-    res.status(201).json({
-      appointment: fullAppointment,
-      pixCode,
-      pixQrCodeBase64,
-      checkoutUrl
-    })
-  } catch (error) {
-    console.error('Error creating appointment:', error)
-    res.status(500).json({ message: 'Erro ao criar agendamento' })
+    if (data.date_time !== undefined) {
+      fields.push('date_time = ?')
+      values.push(data.date_time)
+    }
+
+    if (data.notes !== undefined) {
+      fields.push('notes = ?')
+      values.push(data.notes)
+    }
+
+    if (fields.length === 0) return AppointmentModel.findById(id)
+
+    values.push(id)
+
+    db.prepare(`
+      UPDATE appointments
+      SET ${fields.join(', ')}
+      WHERE id = ?
+    `).run(...values)
+
+    return AppointmentModel.findById(id)
+  },
+
+  cancel: (id: number): boolean => {
+    const result = db.prepare(`
+      UPDATE appointments 
+      SET status = 'cancelado'
+      WHERE id = ?
+    `).run(id)
+
+    return result.changes > 0
+  },
+
+  delete: (id: number): boolean => {
+    const result = db.prepare(`
+      DELETE FROM appointments 
+      WHERE id = ?
+    `).run(id)
+
+    return result.changes > 0
   }
-})
-
-router.get('/:id', (req, res) => {
-  try {
-    const appointment = AppointmentModel.findById(parseInt(req.params.id))
-    if (!appointment) {
-      return res.status(404).json({ message: 'Agendamento nao encontrado' })
-    }
-    res.json({ appointment })
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar agendamento' })
-  }
-})
-
-export default router
-
+}
