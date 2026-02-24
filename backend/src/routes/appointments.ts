@@ -31,7 +31,7 @@ router.post('/', (req, res) => {
     }
 
     const date = dateTime.split('T')[0]
-    const time = dateTime.split('T')[1].substring(0,5)
+    const time = dateTime.split('T')[1].substring(0, 5)
 
     let finalBarberId: number | null = null
 
@@ -59,12 +59,13 @@ router.post('/', (req, res) => {
       return res.status(400).json({ message: 'Horario indisponivel' })
     }
 
-    const client = ClientModel.create({
-      name: clientName,
-      whatsapp: clientWhatsapp,
-      email: clientEmail,
-      birthDate: clientBirthDate
-    })
+    // ✅ CORREÇÃO AQUI
+    const client = ClientModel.create(
+      clientName,
+      clientWhatsapp,
+      clientEmail,
+      clientBirthDate
+    )
 
     const appointment = AppointmentModel.create({
       clientId: client.id,
