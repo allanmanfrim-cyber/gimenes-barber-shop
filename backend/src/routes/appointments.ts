@@ -86,7 +86,13 @@ router.post('/', (req, res) => {
 
     console.log('APPOINTMENT CRIADO:', appointment)
 
-    return res.status(201).json({ appointment })
+    // 🔥 AQUI ESTÁ A CORREÇÃO
+    // Retornamos também os dados do serviço (incluindo preço)
+
+    return res.status(201).json({
+      appointment,
+      service
+    })
 
   } catch (error: any) {
 
