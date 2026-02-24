@@ -20,6 +20,8 @@ router.post('/', (req, res) => {
       referenceImages
     } = req.body
 
+    console.log('BODY RECEBIDO:', req.body)
+
     if (!serviceId || !dateTime || !clientName || !clientWhatsapp) {
       return res.status(400).json({ message: 'Dados incompletos' })
     }
@@ -59,7 +61,6 @@ router.post('/', (req, res) => {
       return res.status(400).json({ message: 'Horario indisponivel' })
     }
 
-    // ✅ CORREÇÃO AQUI
     const client = ClientModel.create(
       clientName,
       clientWhatsapp,
@@ -76,10 +77,16 @@ router.post('/', (req, res) => {
       referenceImages
     })
 
+    console.log('APPOINTMENT CRIADO:', appointment)
+
     res.status(201).json({ appointment })
 
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar agendamento' })
+    console.error('ERRO REAL AO CRIAR AGENDAMENTO:', error)
+    res.status(500).json({
+      message: 'Erro ao criar agendamento',
+      error: String(error)
+    })
   }
 })
 
