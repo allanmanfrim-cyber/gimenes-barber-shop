@@ -20,7 +20,7 @@ export interface Appointment {
   payment?: Payment
 }
 
-function formatAppointmentRow(row: any): Appointment {
+function mapRow(row: any): Appointment {
   return {
     id: row.id,
     tenant_id: row.tenant_id,
@@ -30,31 +30,89 @@ function formatAppointmentRow(row: any): Appointment {
     date_time: row.date_time,
     status: row.status,
     notes: row.notes,
-    reference_images: row.reference_images,
+    reference_images: row.reference_images
   }
 }
 
 export const AppointmentModel = {
 
-  findAll(): Appointment[] {
-    const rows = db.prepare(`SELECT * FROM appointments`).all()
-    return rows.map(formatAppointmentRow)
+  findAll(options?: { date?: string; barberId?: number }): Appointment[] {
+
+    let query = `
+      SELECT *
+      FROM appointments
+      WHERE 1=1
+    `
+
+    const params: any[] = []
+
+    if (options?.date) {
+      query += ` AND date(date_time) = ?`
+      params.push(options.date)
+    }
+
+    if (options?.barberId) {
+      query += ` AND barber_id = ?`
+      params.push(options.barberId)
+    }
+
+    query += ` ORDER BY date_time ASC`
+
+    const rows = db.prepare(query).all(...params)
+    return rows.map(mapRow)
   },
 
   findById(id: number): Appointment | undefined {
-    const row = db.prepare(`SELECT * FROM appointments WHERE id = ?`).get(id)
-    return row ? formatAppointmentRow(row) : undefined
+    const row = db.prepare(`
+      SELECT *
+      FROM appointments
+      WHERE id = ?
+    `).get(id)
+
+    return row ? mapRow(row) : undefined
   },
 
-  findConflicts(barberId: number, dateTime: string): Appointment[] {
-    const rows = db.prepare(`
-      SELECT * FROM appointments
-      WHERE barber_id = ?
-      AND date_time = ?
-      AND status != 'cancelado'
-    `).all(barberId, dateTime)
+  findConflicts(
+    barberId: number,
+    dateTime: string,
+    durationMinutes: number,
+    excludeId?: number,
+    tenantId: number = 1
+  ): Appointment[] {
 
-    return rows.map(formatAppointmentRow)
+    const start = new Date(dateTime)
+    const end = new Date(start.getTime() + durationMinutes * 60000)
+
+    let query = `
+      SELECT *
+      FROM appointments
+      WHERE barber_id = ?
+        AND tenant_id = ?
+        AND status NOT IN ('cancelado', 'no_show')
+        AND (
+          (date_time >= ? AND date_time < ?)
+          OR
+          (datetime(date_time, '+' || ? || ' minutes') > ? AND date_time <= ?)
+        )
+    `
+
+    const params: any[] = [
+      barberId,
+      tenantId,
+      dateTime,
+      end.toISOString(),
+      durationMinutes,
+      dateTime,
+      dateTime
+    ]
+
+    if (excludeId) {
+      query += ` AND id != ?`
+      params.push(excludeId)
+    }
+
+    const rows = db.prepare(query).all(...params)
+    return rows.map(mapRow)
   },
 
   create(data: {
@@ -88,16 +146,35 @@ export const AppointmentModel = {
 
   update(id: number, data: Partial<Appointment>): Appointment | undefined {
 
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (data.status !== undefined) {
+      fields.push('status = ?')
+      values.push(data.status)
+    }
+
+    if (data.date_time !== undefined) {
+      fields.push('date_time = ?')
+      values.push(data.date_time)
+    }
+
+    if (data.notes !== undefined) {
+      fields.push('notes = ?')
+      values.push(data.notes)
+    }
+
+    if (fields.length === 0) {
+      return this.findById(id)
+    }
+
+    values.push(id)
+
     db.prepare(`
       UPDATE appointments
-      SET status = ?, date_time = ?, notes = ?
+      SET ${fields.join(', ')}
       WHERE id = ?
-    `).run(
-      data.status,
-      data.date_time,
-      data.notes,
-      id
-    )
+    `).run(...values)
 
     return this.findById(id)
   },
@@ -120,5 +197,4 @@ export const AppointmentModel = {
 
     return result.changes > 0
   }
-
 }
