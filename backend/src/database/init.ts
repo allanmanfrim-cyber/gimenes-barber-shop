@@ -52,12 +52,14 @@ export function initDatabase() {
 
     CREATE TABLE IF NOT EXISTS appointments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tenant_id INTEGER DEFAULT 1,
       client_id INTEGER NOT NULL,
       barber_id INTEGER NOT NULL,
       service_id INTEGER NOT NULL,
       date_time DATETIME NOT NULL,
       status TEXT DEFAULT 'pending',
       notes TEXT,
+      reference_images TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -83,6 +85,10 @@ export function initDatabase() {
       close_time TEXT NOT NULL,
       is_open INTEGER DEFAULT 1
     );
+
+    CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date_time);
+    CREATE INDEX IF NOT EXISTS idx_appointments_barber ON appointments(barber_id);
+    CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
   `)
 
   seedDatabase()
