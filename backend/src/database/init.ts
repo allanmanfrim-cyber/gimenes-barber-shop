@@ -31,20 +31,23 @@ export function initDatabase() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
-   CREATE TABLE IF NOT EXISTS clients (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  whatsapp TEXT NOT NULL,
-  email TEXT,
-  data_nascimento TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    CREATE TABLE IF NOT EXISTS barbers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tenant_id INTEGER DEFAULT 1,
+      name TEXT NOT NULL,
+      whatsapp TEXT,
+      email TEXT,
+      active INTEGER DEFAULT 1,
+      display_order INTEGER DEFAULT 99,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
 
     CREATE TABLE IF NOT EXISTS clients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       whatsapp TEXT NOT NULL,
       email TEXT,
+      data_nascimento TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
