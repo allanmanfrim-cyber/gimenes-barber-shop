@@ -23,6 +23,7 @@ export interface Appointment {
 export const AppointmentModel = {
 
   findAll: (options?: { date?: string; barberId?: number }): Appointment[] => {
+
     let query = `
       SELECT 
         a.*,
@@ -34,6 +35,7 @@ export const AppointmentModel = {
       LEFT JOIN payments p ON a.id = p.appointment_id
       WHERE 1=1
     `
+
     const params: any[] = []
 
     if (options?.date) {
@@ -48,10 +50,11 @@ export const AppointmentModel = {
 
     query += ' ORDER BY a.date_time ASC'
 
-    return db.prepare(query).all(...params)
+    return db.prepare(query).all(...params) as Appointment[]
   },
 
   findById: (id: number): Appointment | undefined => {
+
     return db.prepare(`
       SELECT 
         a.*,
@@ -62,7 +65,7 @@ export const AppointmentModel = {
       FROM appointments a
       LEFT JOIN payments p ON a.id = p.appointment_id
       WHERE a.id = ?
-    `).get(id)
+    `).get(id) as Appointment | undefined
   },
 
   findConflicts: (
@@ -104,7 +107,7 @@ export const AppointmentModel = {
       params.push(excludeId)
     }
 
-    return db.prepare(query).all(...params)
+    return db.prepare(query).all(...params) as Appointment[]
   },
 
   create: (data: {
@@ -170,6 +173,7 @@ export const AppointmentModel = {
   },
 
   cancel: (id: number): boolean => {
+
     const result = db.prepare(`
       UPDATE appointments 
       SET status = 'cancelado'
@@ -180,6 +184,7 @@ export const AppointmentModel = {
   },
 
   delete: (id: number): boolean => {
+
     const result = db.prepare(`
       DELETE FROM appointments 
       WHERE id = ?
