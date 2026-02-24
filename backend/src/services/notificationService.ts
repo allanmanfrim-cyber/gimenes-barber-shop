@@ -27,13 +27,13 @@ function formatDateTime(dateTime: string): { date: string; time: string } {
 
 export async function notifyAppointmentConfirmed(appointment: Appointment): Promise<void> {
   const { date, time } = formatDateTime(appointment.date_time)
-  const paymentStatus = getPaymentStatusText(appointment)
-  
+  const paymentStatus = getPaymentStatusText(appointment.payment_status)
+
   if (appointment.client?.whatsapp) {
     const alreadySent = NotificationModel.exists(
-      appointment.id, 
-      'whatsapp', 
-      'client', 
+      appointment.id,
+      'whatsapp',
+      'client',
       appointment.client.whatsapp
     )
 
@@ -54,7 +54,7 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
       })
 
       const result = await WhatsAppService.sendMessage(appointment.client.whatsapp, message)
-      
+
       if (result.success) {
         NotificationModel.markSent(notification.id)
       } else {
@@ -65,9 +65,9 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
 
   if (appointment.client?.email) {
     const alreadySent = NotificationModel.exists(
-      appointment.id, 
-      'email', 
-      'client', 
+      appointment.id,
+      'email',
+      'client',
       appointment.client.email
     )
 
@@ -95,7 +95,7 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
         html: emailData.html,
         text: emailData.text
       })
-      
+
       if (result.success) {
         NotificationModel.markSent(notification.id)
       } else {
@@ -105,12 +105,12 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
   }
 
   const barber = BarberModel.findById(appointment.barber_id)
-  
+
   if (barber?.whatsapp) {
     const alreadySent = NotificationModel.exists(
-      appointment.id, 
-      'whatsapp', 
-      'barber', 
+      appointment.id,
+      'whatsapp',
+      'barber',
       barber.whatsapp
     )
 
@@ -132,7 +132,7 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
       })
 
       const result = await WhatsAppService.sendMessage(barber.whatsapp, message)
-      
+
       if (result.success) {
         NotificationModel.markSent(notification.id)
       } else {
@@ -143,9 +143,9 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
 
   if (barber?.email) {
     const alreadySent = NotificationModel.exists(
-      appointment.id, 
-      'email', 
-      'barber', 
+      appointment.id,
+      'email',
+      'barber',
       barber.email
     )
 
@@ -175,7 +175,7 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
         html: emailData.html,
         text: emailData.text
       })
-      
+
       if (result.success) {
         NotificationModel.markSent(notification.id)
       } else {
@@ -184,197 +184,3 @@ export async function notifyAppointmentConfirmed(appointment: Appointment): Prom
     }
   }
 }
-
-export async function notifyAppointmentCancelled(appointment: Appointment): Promise<void> {
-  const { date, time } = formatDateTime(appointment.date_time)
-  
-  if (appointment.client?.whatsapp) {
-    const notification = NotificationModel.create({
-      appointmentId: appointment.id,
-      type: 'whatsapp',
-      recipientType: 'client',
-      recipientContact: appointment.client.whatsapp
-    })
-
-    const message = MessageTemplates.appointmentCancelled({
-      serviceName: appointment.service?.name || '',
-      date,
-      time,
-      isClient: true
-    })
-
-    const result = await WhatsAppService.sendMessage(appointment.client.whatsapp, message)
-    
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-    } else {
-      NotificationModel.markFailed(notification.id, result.error || 'Erro desconhecido')
-    }
-  }
-
-  if (appointment.client?.email) {
-    const notification = NotificationModel.create({
-      appointmentId: appointment.id,
-      type: 'email',
-      recipientType: 'client',
-      recipientContact: appointment.client.email
-    })
-
-    const emailData = EmailTemplates.appointmentCancelled({
-      recipientName: appointment.client.name,
-      serviceName: appointment.service?.name || '',
-      date,
-      time,
-      isClient: true
-    })
-
-    const result = await EmailService.sendEmail({
-      to: appointment.client.email,
-      subject: emailData.subject,
-      html: emailData.html,
-      text: emailData.text
-    })
-    
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-    } else {
-      NotificationModel.markFailed(notification.id, result.error || 'Erro desconhecido')
-    }
-  }
-
-  const barber = BarberModel.findById(appointment.barber_id)
-  
-  if (barber?.whatsapp) {
-    const notification = NotificationModel.create({
-      appointmentId: appointment.id,
-      type: 'whatsapp',
-      recipientType: 'barber',
-      recipientContact: barber.whatsapp
-    })
-
-    const message = MessageTemplates.appointmentCancelled({
-      serviceName: appointment.service?.name || '',
-      date,
-      time,
-      isClient: false
-    })
-
-    const result = await WhatsAppService.sendMessage(barber.whatsapp, message)
-    
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-    } else {
-      NotificationModel.markFailed(notification.id, result.error || 'Erro desconhecido')
-    }
-  }
-
-  if (barber?.email) {
-    const notification = NotificationModel.create({
-      appointmentId: appointment.id,
-      type: 'email',
-      recipientType: 'barber',
-      recipientContact: barber.email
-    })
-
-    const emailData = EmailTemplates.appointmentCancelled({
-      recipientName: barber.name,
-      serviceName: appointment.service?.name || '',
-      date,
-      time,
-      isClient: false
-    })
-
-    const result = await EmailService.sendEmail({
-      to: barber.email,
-      subject: emailData.subject,
-      html: emailData.html,
-      text: emailData.text
-    })
-    
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-    } else {
-      NotificationModel.markFailed(notification.id, result.error || 'Erro desconhecido')
-    }
-  }
-}
-
-export async function notifyAppointmentChanged(
-  appointment: Appointment, 
-  oldDateTime: string
-): Promise<void> {
-  const oldDt = formatDateTime(oldDateTime)
-  const newDt = formatDateTime(appointment.date_time)
-  
-  if (appointment.client?.whatsapp) {
-    const notification = NotificationModel.create({
-      appointmentId: appointment.id,
-      type: 'whatsapp',
-      recipientType: 'client',
-      recipientContact: appointment.client.whatsapp
-    })
-
-    const message = MessageTemplates.appointmentChanged({
-      serviceName: appointment.service?.name || '',
-      oldDate: oldDt.date,
-      oldTime: oldDt.time,
-      newDate: newDt.date,
-      newTime: newDt.time,
-      isClient: true
-    })
-
-    const result = await WhatsAppService.sendMessage(appointment.client.whatsapp, message)
-    
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-    } else {
-      NotificationModel.markFailed(notification.id, result.error || 'Erro desconhecido')
-    }
-  }
-
-  const barber = BarberModel.findById(appointment.barber_id)
-  
-  if (barber?.whatsapp) {
-    const notification = NotificationModel.create({
-      appointmentId: appointment.id,
-      type: 'whatsapp',
-      recipientType: 'barber',
-      recipientContact: barber.whatsapp
-    })
-
-    const message = MessageTemplates.appointmentChanged({
-      serviceName: appointment.service?.name || '',
-      oldDate: oldDt.date,
-      oldTime: oldDt.time,
-      newDate: newDt.date,
-      newTime: newDt.time,
-      isClient: false
-    })
-
-    const result = await WhatsAppService.sendMessage(barber.whatsapp, message)
-    
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-    } else {
-      NotificationModel.markFailed(notification.id, result.error || 'Erro desconhecido')
-    }
-  }
-}
-
-export async function retryNotification(notificationId: number): Promise<boolean> {
-  const notification = NotificationModel.findById(notificationId)
-  if (!notification || notification.status !== 'failed') {
-    return false
-  }
-
-  if (notification.type === 'whatsapp') {
-    const result = await WhatsAppService.sendMessage(notification.recipient_contact, 'Mensagem de reenvio')
-    if (result.success) {
-      NotificationModel.markSent(notification.id)
-      return true
-    }
-  }
-
-  return false
-}
-
