@@ -33,10 +33,12 @@ export function initDatabase() {
 
     CREATE TABLE IF NOT EXISTS barbers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tenant_id INTEGER DEFAULT 1,
       name TEXT NOT NULL,
       whatsapp TEXT,
       email TEXT,
       active INTEGER DEFAULT 1,
+      display_order INTEGER DEFAULT 99,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -118,13 +120,7 @@ export function initDatabase() {
 function seedDatabase() {
   const services = [
     { name: 'Corte de Cabelo', duration_minutes: 30, price: 45.00 },
-    { name: 'Barba', duration_minutes: 20, price: 30.00 },
-    { name: 'Cabelo + Barba', duration_minutes: 60, price: 60.00 },
-    { name: 'Cabelo + Hidratação', duration_minutes: 60, price: 60.00 },
-    { name: 'Cabelo + Barba + Hidratação', duration_minutes: 60, price: 75.00 },
-    { name: 'Pézinho', duration_minutes: 15, price: 15.00 },
-    { name: 'Sobrancelha', duration_minutes: 10, price: 10.00 },
-    { name: 'Só Hidratação', duration_minutes: 30, price: 25.00 }
+    { name: 'Barba', duration_minutes: 20, price: 30.00 }
   ]
 
   const barbers = [
@@ -141,8 +137,8 @@ function seedDatabase() {
 
   for (const barber of barbers) {
     db.prepare(`
-      INSERT INTO barbers (name, whatsapp)
-      VALUES (?, ?)
+      INSERT INTO barbers (name, whatsapp, tenant_id, display_order)
+      VALUES (?, ?, 1, 99)
     `).run(barber.name, barber.whatsapp)
   }
 
