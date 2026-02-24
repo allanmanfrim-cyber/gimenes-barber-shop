@@ -8,6 +8,9 @@ const router = Router()
 
 router.post('/', (req, res) => {
   try {
+
+    console.log('BODY RECEBIDO:', req.body)
+
     const {
       barberId,
       serviceId,
@@ -20,13 +23,11 @@ router.post('/', (req, res) => {
       referenceImages
     } = req.body
 
-    console.log('BODY RECEBIDO:', req.body)
-
     if (!serviceId || !dateTime || !clientName || !clientWhatsapp) {
       return res.status(400).json({ message: 'Dados incompletos' })
     }
 
-    const service = ServiceModel.findById(serviceId)
+    const service = ServiceModel.findById(Number(serviceId))
 
     if (!service) {
       return res.status(404).json({ message: 'Servico nao encontrado' })
@@ -54,7 +55,9 @@ router.post('/', (req, res) => {
     const conflicts = AppointmentModel.findConflicts(
       finalBarberId,
       dateTime,
-      service.duration_minutes
+      service.duration_minutes,
+      undefined,
+      1
     )
 
     if (conflicts.length > 0) {
@@ -64,28 +67,34 @@ router.post('/', (req, res) => {
     const client = ClientModel.create(
       clientName,
       clientWhatsapp,
-      clientEmail,
-      clientBirthDate
+      clientEmail || null,
+      clientBirthDate || null
     )
 
     const appointment = AppointmentModel.create({
       clientId: client.id,
       barberId: finalBarberId,
-      serviceId,
+      serviceId: Number(serviceId),
       dateTime,
-      notes,
-      referenceImages
+      status: 'pendente_pagamento',
+      notes: notes || null,
+      referenceImages: referenceImages
+        ? JSON.stringify(referenceImages)
+        : null,
+      tenantId: 1
     })
 
     console.log('APPOINTMENT CRIADO:', appointment)
 
-    res.status(201).json({ appointment })
+    return res.status(201).json({ appointment })
 
-  } catch (error) {
+  } catch (error: any) {
+
     console.error('ERRO REAL AO CRIAR AGENDAMENTO:', error)
-    res.status(500).json({
+
+    return res.status(500).json({
       message: 'Erro ao criar agendamento',
-      error: String(error)
+      error: error.message
     })
   }
 })
