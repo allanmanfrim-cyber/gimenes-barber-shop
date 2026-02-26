@@ -17,6 +17,7 @@ export default function Booking() {
 
   const {
     step,
+    setStep,
     bookingData,
     services,
     barbers,
@@ -151,6 +152,7 @@ export default function Booking() {
         <PaymentScreen
           appointmentResult={appointmentResult}
           bookingData={bookingData}
+          onPaymentConfirmed={() => setStep(7)}
         />
       )}
 
