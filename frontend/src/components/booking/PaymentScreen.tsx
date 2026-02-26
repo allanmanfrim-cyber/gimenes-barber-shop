@@ -15,6 +15,10 @@ export function PaymentScreen({
 }: PaymentScreenProps) {
   const { paymentMethod } = bookingData
 
+  if (!appointmentResult?.appointment) {
+    return null
+  }
+
   if (paymentMethod === 'pix') {
     return (
       <PixPayment
@@ -32,20 +36,26 @@ export function PaymentScreen({
   if (paymentMethod === 'nubank') {
     return (
       <NubankPayment
+        pixCode={appointmentResult.pixCode}
         appointmentId={appointmentResult.appointment.id}
         amount={appointmentResult.appointment?.service?.price || 0}
         onConfirmed={onPaymentConfirmed}
         onCancel={() => window.location.reload()}
+        onBack={() => window.location.reload()}
       />
     )
   }
 
+  // Pagamento presencial
   return (
-    <div className="text-center text-white">
-      <h2 className="text-xl font-bold mb-4">Pagamento Presencial</h2>
-      <p className="text-dark-300 mb-6">
-        Seu agendamento foi registrado. O pagamento será realizado no salão.
+    <div className="text-center text-white space-y-6">
+      <h2 className="text-xl font-bold">Pagamento Presencial</h2>
+
+      <p className="text-dark-300">
+        Seu agendamento foi registrado.
+        O pagamento será realizado no salão.
       </p>
+
       <button
         onClick={onPaymentConfirmed}
         className="bg-primary-500 text-black px-6 py-3 rounded-lg font-bold"
