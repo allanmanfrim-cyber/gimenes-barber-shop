@@ -1,5 +1,12 @@
 ﻿import { useState, useCallback } from 'react'
-import { BookingData, Service, Barber, TimeSlot, PaymentMethod, PaymentType } from '../types'
+import {
+  BookingData,
+  Service,
+  Barber,
+  TimeSlot,
+  PaymentMethod,
+  PaymentType
+} from '../types'
 import { api } from '../services/api'
 import { format } from 'date-fns'
 
@@ -20,7 +27,8 @@ const initialBookingData: BookingData = {
 
 export function useBooking() {
   const [step, setStep] = useState(1)
-  const [bookingData, setBookingData] = useState<BookingData>(initialBookingData)
+  const [bookingData, setBookingData] =
+    useState<BookingData>(initialBookingData)
   const [services, setServices] = useState<Service[]>([])
   const [barbers, setBarbers] = useState<Barber[]>([])
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
@@ -52,20 +60,28 @@ export function useBooking() {
     }
   }, [])
 
-  const loadAvailability = useCallback(async (barberId: string | 'any', date: Date) => {
-    if (!bookingData.service) return
-    setLoading(true)
-    try {
-      const dateStr = format(date, 'yyyy-MM-dd')
-      const { slots } = await api.availability.get(barberId, dateStr, bookingData.service.id)
-      setTimeSlots(slots)
-      setBookingData(prev => ({ ...prev, date: dateStr }))
-    } catch {
-      setError('Erro ao carregar horários')
-    } finally {
-      setLoading(false)
-    }
-  }, [bookingData.service])
+  const loadAvailability = useCallback(
+    async (barberId: string | 'any', date: Date) => {
+      if (!bookingData.service) return
+
+      setLoading(true)
+      try {
+        const dateStr = format(date, 'yyyy-MM-dd')
+        const { slots } = await api.availability.get(
+          barberId,
+          dateStr,
+          bookingData.service.id
+        )
+        setTimeSlots(slots)
+        setBookingData(prev => ({ ...prev, date: dateStr }))
+      } catch {
+        setError('Erro ao carregar horários')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [bookingData.service]
+  )
 
   const selectService = (service: Service) => {
     setBookingData(prev => ({ ...prev, service }))
@@ -82,8 +98,13 @@ export function useBooking() {
     setStep(4)
   }
 
-  // 🔥 CORRIGIDO AQUI
-  const setClientInfo = (name: string, whatsapp: string, email: string, birthDate: string, notes: string) => {
+  const setClientInfo = (
+    name: string,
+    whatsapp: string,
+    email: string,
+    birthDate: string,
+    notes: string
+  ) => {
     setBookingData(prev => ({
       ...prev,
       clientName: name,
@@ -92,7 +113,6 @@ export function useBooking() {
       clientBirthDate: birthDate,
       notes
     }))
-
     setStep(5)
   }
 
@@ -134,7 +154,9 @@ export function useBooking() {
 
       return true
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar agendamento')
+      setError(
+        err instanceof Error ? err.message : 'Erro ao criar agendamento'
+      )
       return false
     } finally {
       setLoading(false)
@@ -142,7 +164,7 @@ export function useBooking() {
   }
 
   const goBack = () => {
-    if (step > 1) setStep(step - 1)
+    if (step > 1) setStep(prev => prev - 1)
   }
 
   const reset = () => {
@@ -154,6 +176,7 @@ export function useBooking() {
 
   return {
     step,
+    setStep,
     bookingData,
     services,
     barbers,

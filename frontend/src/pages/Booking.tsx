@@ -6,14 +6,15 @@ import { ServiceSelect } from '../components/booking/ServiceSelect'
 import { BarberSelect } from '../components/booking/BarberSelect'
 import { DateTimeSelect } from '../components/booking/DateTimeSelect'
 import { ClientForm } from '../components/booking/ClientForm'
-import { ReferenceImageUpload } from '../components/booking/ReferenceImageUpload'
 import { PaymentSelect } from '../components/booking/PaymentSelect'
-import { Confirmation } from '../components/booking/Confirmation'
+import { PaymentScreen } from '../components/booking/PaymentScreen'
+import { FinalScreen } from '../components/booking/FinalScreen'
 import { BookingStepper } from '../components/booking/BookingStepper'
 import { ArrowLeft, X } from 'lucide-react'
 
 export default function Booking() {
   const navigate = useNavigate()
+
   const {
     step,
     bookingData,
@@ -42,24 +43,22 @@ export default function Booking() {
   }, [loadServices, loadBarbers])
 
   const stepTitles = [
-    'Servico',
+    'Serviço',
     'Barbeiro',
-    'Data e Horario',
+    'Data e Horário',
     'Seus Dados',
     'Pagamento',
-    'Confirmacao'
+    'Finalizar Pagamento',
+    'Concluído'
   ]
 
   const handleBack = () => {
-    if (step === 1) {
-      navigate('/')
-    } else {
-      goBack()
-    }
+    if (step === 1) navigate('/')
+    else goBack()
   }
 
   const handleCancel = () => {
-    if (window.confirm('Deseja cancelar o agendamento e voltar ao inicio?')) {
+    if (window.confirm('Deseja cancelar o agendamento e voltar ao início?')) {
       reset()
       navigate('/')
     }
@@ -74,20 +73,20 @@ export default function Booking() {
     <Layout showHeader={false}>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          {step < 6 && (
+          {step < 7 && (
             <button
               onClick={handleBack}
-              className="flex items-center gap-2 text-dark-400 hover:text-white transition-colors border border-dark-700 rounded-lg px-3 py-1.5 bg-dark-800"
+              className="flex items-center gap-2 text-dark-400 hover:text-white border border-dark-700 rounded-lg px-3 py-1.5 bg-dark-800"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-sm font-medium">Voltar</span>
             </button>
           )}
 
-          {step > 1 && step < 6 && (
+          {step > 1 && step < 7 && (
             <button
               onClick={handleCancel}
-              className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors px-3 py-1.5"
+              className="flex items-center gap-2 text-red-400 hover:text-red-300 px-3 py-1.5"
             >
               <X className="w-4 h-4" />
               <span className="text-sm font-medium">Cancelar</span>
@@ -99,10 +98,7 @@ export default function Booking() {
           {stepTitles[step - 1]}
         </h2>
 
-        <BookingStepper
-          currentStep={step === 4.5 ? 5 : step >= 5 ? (step === 5 ? 6 : 7) : step}
-          totalSteps={7}
-        />
+        <BookingStepper currentStep={step} totalSteps={7} />
       </div>
 
       {error && (
@@ -112,19 +108,11 @@ export default function Booking() {
       )}
 
       {step === 1 && (
-        <ServiceSelect
-          services={services}
-          loading={loading}
-          onSelect={selectService}
-        />
+        <ServiceSelect services={services} loading={loading} onSelect={selectService} />
       )}
 
       {step === 2 && (
-        <BarberSelect
-          barbers={barbers}
-          loading={loading}
-          onSelect={selectBarber}
-        />
+        <BarberSelect barbers={barbers} loading={loading} onSelect={selectBarber} />
       )}
 
       {step === 3 && (
@@ -160,13 +148,15 @@ export default function Booking() {
       )}
 
       {step === 6 && appointmentResult && (
-        <Confirmation
-          appointment={{
-            ...appointmentResult.appointment,
-            service: appointmentResult.service
-          }}
-          pixCode={appointmentResult.pixCode}
-          pixQrCodeBase64={appointmentResult.pixQrCodeBase64}
+        <PaymentScreen
+          appointmentResult={appointmentResult}
+          bookingData={bookingData}
+        />
+      )}
+
+      {step === 7 && appointmentResult && (
+        <FinalScreen
+          appointment={appointmentResult.appointment}
           onFinish={handleFinish}
         />
       )}
