@@ -10,7 +10,7 @@ import { ReferenceImageUpload } from '../components/booking/ReferenceImageUpload
 import { PaymentSelect } from '../components/booking/PaymentSelect'
 import { Confirmation } from '../components/booking/Confirmation'
 import { BookingStepper } from '../components/booking/BookingStepper'
-import { ArrowLeft, X } from 'lucide-react' // Import X icon
+import { ArrowLeft, X } from 'lucide-react'
 
 export default function Booking() {
   const navigate = useNavigate()
@@ -58,7 +58,6 @@ export default function Booking() {
     }
   }
 
-  // Botao para cancelar e voltar ao inicio
   const handleCancel = () => {
     if (window.confirm('Deseja cancelar o agendamento e voltar ao inicio?')) {
       reset()
@@ -75,34 +74,34 @@ export default function Booking() {
     <Layout showHeader={false}>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-            {step < 6 && (
-                <button
-                    onClick={handleBack}
-                    className="flex items-center gap-2 text-dark-400 hover:text-white transition-colors border border-dark-700 rounded-lg px-3 py-1.5 bg-dark-800"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span className="text-sm font-medium">Voltar</span>
-                </button>
-            )}
+          {step < 6 && (
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-dark-400 hover:text-white transition-colors border border-dark-700 rounded-lg px-3 py-1.5 bg-dark-800"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Voltar</span>
+            </button>
+          )}
 
-            {step > 1 && step < 6 && (
-                <button
-                    onClick={handleCancel}
-                    className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors px-3 py-1.5"
-                >
-                    <X className="w-4 h-4" />
-                    <span className="text-sm font-medium">Cancelar</span>
-                </button>
-            )}
+          {step > 1 && step < 6 && (
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors px-3 py-1.5"
+            >
+              <X className="w-4 h-4" />
+              <span className="text-sm font-medium">Cancelar</span>
+            </button>
+          )}
         </div>
-        
+
         <h2 className="text-2xl font-bold text-white mb-2">
           {stepTitles[step - 1]}
         </h2>
-        
-        <BookingStepper 
-          currentStep={step === 4.5 ? 5 : step >= 5 ? (step === 5 ? 6 : 7) : step} 
-          totalSteps={7} 
+
+        <BookingStepper
+          currentStep={step === 4.5 ? 5 : step >= 5 ? (step === 5 ? 6 : 7) : step}
+          totalSteps={7}
         />
       </div>
 
@@ -162,23 +161,15 @@ export default function Booking() {
 
       {step === 6 && appointmentResult && (
         <Confirmation
-          appointment={appointmentResult.appointment}
+          appointment={{
+            ...appointmentResult.appointment,
+            service: appointmentResult.service
+          }}
           pixCode={appointmentResult.pixCode}
+          pixQrCodeBase64={appointmentResult.pixQrCodeBase64}
           onFinish={handleFinish}
         />
       )}
     </Layout>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
