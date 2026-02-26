@@ -109,11 +109,19 @@ export default function Booking() {
       )}
 
       {step === 1 && (
-        <ServiceSelect services={services} loading={loading} onSelect={selectService} />
+        <ServiceSelect
+          services={services}
+          loading={loading}
+          onSelect={selectService}
+        />
       )}
 
       {step === 2 && (
-        <BarberSelect barbers={barbers} loading={loading} onSelect={selectBarber} />
+        <BarberSelect
+          barbers={barbers}
+          loading={loading}
+          onSelect={selectBarber}
+        />
       )}
 
       {step === 3 && (
@@ -158,7 +166,7 @@ export default function Booking() {
 
       {step === 7 && appointmentResult && (
         <FinalScreen
-          appointment={appointmentResult.appointment}
+          appointmentResult={appointmentResult}
           onFinish={handleFinish}
         />
       )}
