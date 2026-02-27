@@ -6,7 +6,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
 
-      {/* LOGO */}
       <div className="mb-10 text-center">
         <img
           src="/images/logo.png"
@@ -21,9 +20,8 @@ export default function Home() {
         </p>
       </div>
 
-      {/* BOTÃO */}
       <button
-        onClick={() => navigate('/booking')}
+        onClick={() => navigate('/agendar')}
         className="bg-primary-500 text-black px-8 py-4 rounded-xl font-bold hover:opacity-90 transition-all"
       >
         Agendar Horário
