@@ -1,7 +1,7 @@
 ﻿import { DataTypes } from 'sequelize'
-import { sequelize } from '../database'
+import { sequelize } from '../database/index.js'
 
-const Service = sequelize.define('Service', {
+export const ServiceModel = sequelize.define('Service', {
   name: {
     type: DataTypes.STRING,
     allowNull: false
@@ -23,5 +23,3 @@ const Service = sequelize.define('Service', {
     defaultValue: true
   }
 })
-
-export default Service
