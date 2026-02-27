@@ -12,7 +12,6 @@ interface PaymentSelectProps {
   onSubmit: () => void
 }
 
-// 🔥 CONTROLE DE EXIBIÇÃO DO CARTÃO
 const ENABLE_CREDIT_CARD = false
 
 export function PaymentSelect({
@@ -59,11 +58,9 @@ export function PaymentSelect({
           <p className="text-xs font-bold text-neutral-500 uppercase mb-2">
             Resumo da Reserva
           </p>
-
           <h3 className="text-lg font-bold text-white">
             {bookingData.service?.name}
           </h3>
-
           <p className="text-primary-500 text-sm">
             {bookingData.barber?.name || 'Próximo Barbeiro'}
           </p>
@@ -76,7 +73,6 @@ export function PaymentSelect({
               {formattedDate}
             </span>
           </div>
-
           <span className="text-sm text-white">
             {bookingData.time}
           </span>
@@ -86,20 +82,17 @@ export function PaymentSelect({
           <p className="text-xs text-neutral-500 mb-1">
             Valor
           </p>
-
           <p className="text-3xl font-bold text-white">
             R$ {bookingData.service?.price.toFixed(2).replace('.', ',')}
           </p>
         </div>
-
       </div>
 
-      {/* TIPO DE PAGAMENTO */}
+      {/* TIPO PAGAMENTO */}
       <div className="grid grid-cols-2 gap-3 bg-neutral-900 rounded-xl p-1">
-
         <button
           onClick={() => handleTypeChange('online')}
-          className={`py-3 rounded-lg text-sm font-bold ${
+          className={`py-3 rounded-lg text-sm font-bold transition-all ${
             paymentType === 'online'
               ? 'bg-primary-500 text-black'
               : 'text-neutral-400'
@@ -110,7 +103,7 @@ export function PaymentSelect({
 
         <button
           onClick={() => handleTypeChange('presencial')}
-          className={`py-3 rounded-lg text-sm font-bold ${
+          className={`py-3 rounded-lg text-sm font-bold transition-all ${
             paymentType === 'presencial'
               ? 'bg-primary-500 text-black'
               : 'text-neutral-400'
@@ -118,7 +111,6 @@ export function PaymentSelect({
         >
           Pagar no Salão
         </button>
-
       </div>
 
       {/* MÉTODOS */}
@@ -129,37 +121,61 @@ export function PaymentSelect({
             {/* PIX */}
             <button
               onClick={() => handleMethodSelect('pix')}
-              className="w-full p-4 bg-black border border-neutral-700 rounded-xl text-left"
+              className={`w-full p-4 border rounded-xl text-left transition-all ${
+                selectedMethod === 'pix'
+                  ? 'bg-primary-500 text-black border-primary-500'
+                  : 'bg-black border-neutral-700 text-white'
+              }`}
             >
-              <p className="text-white font-bold">Pix</p>
-              <p className="text-xs text-neutral-400">
-                Confirmação imediata
-              </p>
+              <div className="flex items-center gap-4">
+                <img
+                  src="/images/Pix.png"
+                  alt="Pix"
+                  className="w-8 h-8 object-contain"
+                />
+                <div>
+                  <p className="font-bold">Pix</p>
+                  <p className="text-xs opacity-70">
+                    Confirmação imediata
+                  </p>
+                </div>
+              </div>
             </button>
 
             {/* NUBANK */}
             <button
               onClick={() => handleMethodSelect('nubank')}
-              className="w-full p-4 bg-black border border-neutral-700 rounded-xl text-left"
+              className={`w-full p-4 border rounded-xl text-left transition-all ${
+                selectedMethod === 'nubank'
+                  ? 'bg-primary-500 text-black border-primary-500'
+                  : 'bg-black border-neutral-700 text-white'
+              }`}
             >
-              <p className="text-white font-bold">Nubank</p>
-              <p className="text-xs text-neutral-400">
-                Pagamento pelo app
-              </p>
+              <div className="flex items-center gap-4">
+                <img
+                  src="/images/Nubank.png"
+                  alt="Nubank"
+                  className="w-8 h-8 object-contain"
+                />
+                <div>
+                  <p className="font-bold">Nubank</p>
+                  <p className="text-xs opacity-70">
+                    Pagamento pelo app
+                  </p>
+                </div>
+              </div>
             </button>
 
-            {/* CARTÃO OPCIONAL */}
             {ENABLE_CREDIT_CARD && (
               <button
                 onClick={() => handleMethodSelect('credit_card')}
-                className="w-full p-4 bg-black border border-neutral-700 rounded-xl text-left"
+                className={`w-full p-4 border rounded-xl text-left transition-all ${
+                  selectedMethod === 'credit_card'
+                    ? 'bg-primary-500 text-black border-primary-500'
+                    : 'bg-black border-neutral-700 text-white'
+                }`}
               >
-                <p className="text-white font-bold">
-                  Cartão de Crédito
-                </p>
-                <p className="text-xs text-neutral-400">
-                  Crédito ou Débito
-                </p>
+                Cartão de Crédito
               </button>
             )}
           </>
@@ -169,24 +185,27 @@ export function PaymentSelect({
           <>
             <button
               onClick={() => handleMethodSelect('machine')}
-              className="w-full p-4 bg-black border border-neutral-700 rounded-xl text-left"
+              className={`w-full p-4 border rounded-xl text-left transition-all ${
+                selectedMethod === 'machine'
+                  ? 'bg-primary-500 text-black border-primary-500'
+                  : 'bg-black border-neutral-700 text-white'
+              }`}
             >
-              <p className="text-white font-bold">
-                Maquininha
-              </p>
+              Maquininha
             </button>
 
             <button
               onClick={() => handleMethodSelect('cash')}
-              className="w-full p-4 bg-black border border-neutral-700 rounded-xl text-left"
+              className={`w-full p-4 border rounded-xl text-left transition-all ${
+                selectedMethod === 'cash'
+                  ? 'bg-primary-500 text-black border-primary-500'
+                  : 'bg-black border-neutral-700 text-white'
+              }`}
             >
-              <p className="text-white font-bold">
-                Dinheiro
-              </p>
+              Dinheiro
             </button>
           </>
         )}
-
       </div>
 
       <Button fullWidth onClick={onSubmit} loading={loading}>
@@ -196,7 +215,6 @@ export function PaymentSelect({
       <div className="text-center text-xs text-neutral-600 pt-4">
         Pagamento 100% Seguro
       </div>
-
     </div>
   )
 }
