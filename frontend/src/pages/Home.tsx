@@ -1,5 +1,13 @@
 ﻿import { useNavigate } from 'react-router-dom'
-import { Shield, Sparkles, Clock, Instagram, Phone, Calendar } from 'lucide-react'
+import {
+  Shield,
+  Sparkles,
+  Clock,
+  Instagram,
+  Phone,
+  Calendar,
+  MapPin
+} from 'lucide-react'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -13,7 +21,7 @@ export default function Home() {
         <img
           src="/images/logo.png"
           alt="Gimenes Barber Shop"
-          className="w-64 mx-auto mb-8"
+          className="w-96 mx-auto mb-10"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
@@ -54,7 +62,6 @@ export default function Home() {
 
       </section>
 
-
       {/* PROFISSIONAIS */}
       <section className="px-6 py-16 max-w-5xl mx-auto">
 
@@ -74,25 +81,34 @@ export default function Home() {
             <img
               src="/images/junior.png"
               alt="Júnior Gimenes"
-              className="w-56 rounded-2xl object-cover"
+              className="w-56 h-56 rounded-2xl object-cover"
             />
 
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-2xl font-bold">Júnior Gimenes</h3>
-              <span className="inline-block bg-primary-500 text-black px-4 py-1 rounded-full text-sm font-bold my-3">
-                DISPONÍVEL
-              </span>
+
               <p className="text-neutral-400 mb-4">
                 Barbeiro Especialista
               </p>
 
-              <div className="flex gap-4 justify-center md:justify-start">
-                <a href="https://instagram.com" target="_blank">
-                  <Instagram className="text-primary-500" />
+              <div className="flex gap-6 justify-center md:justify-start">
+
+                <a
+                  href="https://www.instagram.com/_juniorgimenes_/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Instagram className="text-primary-500 hover:scale-110 transition-all" />
                 </a>
-                <a href="https://wa.me/5517992195185" target="_blank">
-                  <Phone className="text-primary-500" />
+
+                <a
+                  href="https://wa.me/5517992195185"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Phone className="text-primary-500 hover:scale-110 transition-all" />
                 </a>
+
               </div>
             </div>
 
@@ -105,25 +121,34 @@ export default function Home() {
             <img
               src="/images/abner.png"
               alt="Abner William"
-              className="w-56 rounded-2xl object-cover"
+              className="w-56 h-56 rounded-2xl object-cover"
             />
 
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-2xl font-bold">Abner William</h3>
-              <span className="inline-block bg-primary-500 text-black px-4 py-1 rounded-full text-sm font-bold my-3">
-                DISPONÍVEL
-              </span>
+
               <p className="text-neutral-400 mb-4">
                 Barbeiro Especialista
               </p>
 
-              <div className="flex gap-4 justify-center md:justify-start">
-                <a href="https://instagram.com" target="_blank">
-                  <Instagram className="text-primary-500" />
+              <div className="flex gap-6 justify-center md:justify-start">
+
+                <a
+                  href="https://www.instagram.com/barbeiroabner_ofc/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Instagram className="text-primary-500 hover:scale-110 transition-all" />
                 </a>
-                <a href="https://wa.me/5517992195185" target="_blank">
-                  <Phone className="text-primary-500" />
+
+                <a
+                  href="https://wa.me/5517981128073"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Phone className="text-primary-500 hover:scale-110 transition-all" />
                 </a>
+
               </div>
             </div>
 
@@ -134,47 +159,102 @@ export default function Home() {
       </section>
 
 
-      {/* INFORMAÇÕES DA BARBEARIA */}
-      <section className="border-t border-white/10 px-6 py-16 max-w-4xl mx-auto">
+      {/* RODAPÉ */}
+      <footer className="border-t border-white/10 px-6 py-16 max-w-4xl mx-auto">
 
-        <h2 className="text-2xl font-bold mb-6">
-          Gimenes Barber Shop
-        </h2>
+        <div className="flex items-center gap-4 mb-6">
+          <div className="bg-neutral-900 p-4 rounded-xl text-primary-500 font-bold">
+            G
+          </div>
+          <h2 className="text-2xl font-bold">
+            Gimenes Barber Shop
+          </h2>
+        </div>
 
         <p className="text-neutral-400 mb-10">
           A melhor experiência em barbearia da região de José Bonifácio.
           Tradição, estilo e o melhor atendimento para você.
         </p>
 
-        <div className="space-y-6">
+        <h3 className="font-bold mb-4">CONTATOS</h3>
 
-          <div>
-            <h4 className="font-semibold">Contato</h4>
-            <p className="text-neutral-400">
-              R. Ademar de Barros, 278 - Centro - José Bonifácio/SP
-            </p>
-            <p className="text-neutral-400">
-              (17) 99219-5185
-            </p>
+        <div className="space-y-4 mb-8">
+
+          <div className="flex items-start gap-3">
+            <MapPin className="text-primary-500 mt-1" />
+            <div>
+              <p>R. Ademar de Barros, 278</p>
+              <p className="text-neutral-400 text-sm">
+                Centro - José Bonifácio/SP
+              </p>
+            </div>
           </div>
 
-          <div>
-            <h4 className="font-semibold">Horários</h4>
-            <p className="text-neutral-400">
-              Segunda à Sexta — 09h às 20h
-            </p>
-            <p className="text-neutral-400">
-              Sábado — 08h às 18h
-            </p>
+          <div className="flex items-start gap-3">
+            <Instagram className="text-primary-500 mt-1" />
+            <a
+              href="https://www.instagram.com/gimenesbarberjr/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-500 transition-all"
+            >
+              @gimenesbarberjr
+            </a>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Phone className="text-primary-500 mt-1" />
+            <div>
+              <p>(17) 99219-5185</p>
+              <p className="text-neutral-400 text-sm">
+                WhatsApp Oficial
+              </p>
+            </div>
           </div>
 
         </div>
 
-      </section>
+        <h3 className="font-bold mb-4">HORÁRIOS</h3>
 
+        <div className="space-y-4 mb-10">
 
-      <footer className="border-t border-white/10 text-center py-6 text-neutral-600 text-sm">
-        © 2026 Gimenes Barber Shop • Todos os direitos reservados
+          <div className="flex items-start gap-3">
+            <Clock className="text-primary-500 mt-1" />
+            <div>
+              <p>Segunda à Sexta</p>
+              <p className="text-neutral-400 text-sm">
+                09h às 20h
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Clock className="text-primary-500 mt-1" />
+            <div>
+              <p>Sábado</p>
+              <p className="text-neutral-400 text-sm">
+                08h às 18h
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="text-center mb-6">
+          <a
+            href="/admin"
+            className="text-primary-500 underline"
+          >
+            Acesso Administrador
+          </a>
+        </div>
+
+        <div className="border-t border-white/10 pt-6 text-center text-neutral-600 text-sm">
+          © 2026 Gimenes Barber Shop • Todos os direitos reservados
+          <br />
+          Desenvolvido por <span className="text-primary-500">Agência Frita Kuka</span>
+        </div>
+
       </footer>
 
     </div>
