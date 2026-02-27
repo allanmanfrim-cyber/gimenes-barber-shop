@@ -1,7 +1,7 @@
 ﻿import { DataTypes } from 'sequelize'
 import { sequelize } from '../database'
 
-export const Service = sequelize.define('Service', {
+const Service = sequelize.define('Service', {
   name: {
     type: DataTypes.STRING,
     allowNull: false
@@ -23,3 +23,5 @@ export const Service = sequelize.define('Service', {
     defaultValue: true
   }
 })
+
+export default Service
