@@ -1,8 +1,8 @@
 ﻿import { DataTypes } from 'sequelize'
 import { sequelize } from '../database/init.js'
-import { Service } from './Service.js'
+import { ServiceModel } from './Service.js'
 
-export const Appointment = sequelize.define('Appointment', {
+export const AppointmentModel = sequelize.define('Appointment', {
   tenant_id: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -37,7 +37,6 @@ export const Appointment = sequelize.define('Appointment', {
   }
 })
 
-// Relacionamento
-Appointment.belongsTo(Service, {
+AppointmentModel.belongsTo(ServiceModel, {
   foreignKey: 'service_id'
 })

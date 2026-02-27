@@ -1,5 +1,5 @@
 ﻿import { DataTypes } from 'sequelize'
-import { sequelize } from '../database/index.js'
+import { sequelize } from '../database/init.js'
 
 export const ServiceModel = sequelize.define('Service', {
   name: {
