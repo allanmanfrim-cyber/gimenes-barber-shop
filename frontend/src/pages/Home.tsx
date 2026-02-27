@@ -79,7 +79,7 @@ export default function Home() {
           <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6">
 
             <img
-              src="/images/junior.png"
+              src="/images/Júnior.png"
               alt="Júnior Gimenes"
               className="w-56 h-56 rounded-2xl object-cover"
             />
@@ -119,7 +119,7 @@ export default function Home() {
           <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6">
 
             <img
-              src="/images/abner.png"
+              src="/images/Abner.png"
               alt="Abner William"
               className="w-56 h-56 rounded-2xl object-cover"
             />
