@@ -1,25 +1,17 @@
-﻿import { DataTypes } from 'sequelize'
-import { sequelize } from '../database/init.js'
+﻿import { db } from '../database/init.js'
 
-export const ServiceModel = sequelize.define('Service', {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
+export const ServiceModel = {
+
+  findById(id: number) {
+    return db
+      .prepare('SELECT * FROM services WHERE id = ? AND active = 1')
+      .get(id)
   },
-  price: {
-    type: DataTypes.FLOAT,
-    allowNull: false
-  },
-  duration: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
+
+  findAll() {
+    return db
+      .prepare('SELECT * FROM services WHERE active = 1')
+      .all()
   }
-})
+
+}
